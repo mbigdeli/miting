@@ -1,0 +1,34 @@
+{
+  "name": "Standup Digest",
+  "description": "Fast daily-standup recap: what moved, what's next, what's stuck.",
+  "sections": [
+    {
+      "title": "Digest",
+      "instruction": "One or two sentences capturing the overall state of the team today, grounded strictly in the transcript. No fluff, no invented status.",
+      "format": "paragraph"
+    },
+    {
+      "title": "Since Last Standup",
+      "instruction": "Work each person reported as done. Use the speaker's own wording where possible and attribute every line to the person who said it. Omit anything not explicitly reported. If nobody reported completed work, write 'None reported.'",
+      "format": "list",
+      "item_format": "| **Owner** | **Completed** |\n| --- | --- |"
+    },
+    {
+      "title": "Up Next",
+      "instruction": "Work each person committed to next, with the owner. Only include commitments actually stated in the transcript; do not infer plans. If none, write 'None stated.'",
+      "format": "list",
+      "item_format": "| **Owner** | **Planned** |\n| --- | --- |"
+    },
+    {
+      "title": "Blockers",
+      "instruction": "Every impediment mentioned, who raised it, and who (if anyone) agreed to unblock it. A blocker without a named unblocker gets '—' in that column. If none were raised, write 'No blockers raised.'",
+      "format": "list",
+      "item_format": "| **Raised by** | **Blocker** | **Unblocker** |\n| --- | --- | --- |"
+    },
+    {
+      "title": "Announcements",
+      "instruction": "Anything said that the whole team should know (releases, schedule changes, visitors). Skip this section's content with 'None.' if there were no announcements.",
+      "format": "paragraph"
+    }
+  ]
+}

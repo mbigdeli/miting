@@ -1,0 +1,10 @@
+# pnpm v10 settings (the package.json "pnpm" field is no longer read).
+# core-js runs a postinstall script; without this approval pnpm v10 blocks it
+# and `pnpm build` fails on every clean clone with ERR_PNPM_IGNORED_BUILDS.
+onlyBuiltDependencies:
+  - core-js
+# pnpm v10 re-runs `pnpm install` before every script and aborts the script
+# when that check exits non-zero — on a clean clone the ignored-builds state
+# made every `pnpm build`/`pnpm tauri:build` die in the pre-check. Installs
+# here are explicit; the pre-run re-install adds nothing but this failure.
+verifyDepsBeforeRun: false

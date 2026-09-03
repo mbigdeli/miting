@@ -1,0 +1,40 @@
+{
+  "name": "Status Report",
+  "description": "Project status: progress, risks, decisions, and who does what next.",
+  "sections": [
+    {
+      "title": "Executive Summary",
+      "instruction": "Three to five sentences a stakeholder who skipped the miting can trust: overall trajectory, the single biggest risk, and the most consequential decision. Ground every claim in the transcript; never invent status or dates.",
+      "format": "paragraph"
+    },
+    {
+      "title": "Progress",
+      "instruction": "Each workstream or milestone discussed, its reported state, and the expected date only if one was actually said. Use '—' for anything not stated. If no progress was discussed, write 'Not discussed.'",
+      "format": "list",
+      "item_format": "| **Workstream** | **Status** | **ETA** |\n| --- | --- | --- |"
+    },
+    {
+      "title": "Risks & Mitigations",
+      "instruction": "Risks raised in the conversation, their stated impact, the agreed mitigation, and the owner. Only list risks someone actually voiced. If none, write 'No risks raised.'",
+      "format": "list",
+      "item_format": "| **Risk** | **Impact** | **Mitigation** | **Owner** |\n| --- | --- | --- | --- |"
+    },
+    {
+      "title": "Decisions",
+      "instruction": "Decisions actually made (not options merely discussed), each with the stated rationale. Phrase them so they stand alone without context. If none were made, write 'No decisions made.'",
+      "format": "list",
+      "item_format": "| **Decision** | **Rationale** |\n| --- | --- |"
+    },
+    {
+      "title": "Action Items",
+      "instruction": "Every task someone agreed to do, with owner and due date if stated ('—' otherwise). One row per task; be specific enough that the owner recognises it a week later. If none, write 'No action items.'",
+      "format": "list",
+      "item_format": "| **Owner** | **Task** | **Due** |\n| --- | --- | --- |"
+    },
+    {
+      "title": "Open Questions",
+      "instruction": "Questions raised but left unanswered — these become next miting's agenda. If everything raised was resolved, write 'None.'",
+      "format": "list"
+    }
+  ]
+}

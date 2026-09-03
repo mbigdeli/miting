@@ -1,0 +1,167 @@
+name: CI
+
+# Quality gate — runs on every PR and push to main.
+# The existing build-*.yml / release.yml workflows are the release path and
+# stay manual (workflow_dispatch); this file is the only automated gate.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rust:
+    name: Rust (fmt · clippy · test)
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: frontend/src-tauri
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: frontend/src-tauri
+      # Tauri's build script requires the sidecar binaries (externalBin) to
+      # exist. The llama-helper sidecar isn't built in the test gate (heavy,
+      # GPU deps) and unit tests never execute it — stub the file so the build
+      # script's existence check passes. (build.rs auto-downloads ffmpeg.)
+      - name: Stub sidecar binaries
+        shell: bash
+        run: |
+          mkdir -p binaries
+          : > binaries/llama-helper-x86_64-pc-windows-msvc.exe
+          : > binaries/shenava-helper-x86_64-pc-windows-msvc.exe
+          : > binaries/miting-pairing-host-x86_64-pc-windows-msvc.exe
+      # Hard gate: logic tests must pass. Native audio/whisper/parakeet tests do
+      # FFI device access and segfault on headless runners (0xc0000005) — they
+      # run locally, not in CI. This still covers summary/db/connectors/export/
+      # providers/gmeet (the logic that regresses).
+      - run: "cargo test --lib -- --skip audio:: --skip whisper --skip parakeet"
+      # Advisory until a formatting + warnings cleanup pass (the existing
+      # codebase is not rustfmt-clean and has ~15 legacy clippy warnings).
+      # Flip continue-on-error off once clean. New code should still be tidy;
+      # clippy.toml enforces per-function size/complexity.
+      - run: cargo fmt --all --check
+        continue-on-error: true
+      - run: cargo clippy --lib -- -D warnings
+        continue-on-error: true
+
+  # Compile-only gate for the other desktop targets: a cfg(target_os) break
+  # on mac or linux used to be invisible until someone tried a real build.
+  # `cargo check` only — no tests, no sidecar execution, no GPU deps.
+  rust-cross-check:
+    name: Rust check (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            triple: aarch64-apple-darwin
+            ext: ""
+          - os: ubuntu-latest
+            triple: x86_64-unknown-linux-gnu
+            ext: ""
+    defaults:
+      run:
+        working-directory: frontend/src-tauri
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: frontend/src-tauri
+          key: cross-check-${{ matrix.os }}
+      - name: Install Linux build deps
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libasound2-dev \
+            build-essential libssl-dev libgtk-3-dev libayatana-appindicator3-dev
+      - name: Stub sidecar binaries
+        shell: bash
+        run: |
+          mkdir -p binaries
+          : > "binaries/llama-helper-${{ matrix.triple }}${{ matrix.ext }}"
+          : > "binaries/shenava-helper-${{ matrix.triple }}${{ matrix.ext }}"
+          : > "binaries/miting-pairing-host-${{ matrix.triple }}${{ matrix.ext }}"
+      - run: cargo check --lib
+
+  extension:
+    name: Extension (typecheck · vitest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: extension
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      # Extension e2e: build the unpacked extension, then load it in Playwright.
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+
+  frontend:
+    name: Frontend (typecheck · vitest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      # --no-frozen-lockfile: the package.json `pnpm.overrides` aren't reflected
+      # in the lockfile (pnpm 9 no longer reads that field), so a frozen install
+      # refuses. TODO: move overrides to pnpm-workspace.yaml + regenerate the
+      # lockfile, then restore --frozen-lockfile.
+      - run: pnpm install --no-frozen-lockfile
+      # Hard gate: type safety.
+      - run: pnpm run typecheck
+      # Hard gate: pure-logic unit tests (tests/unit, vitest).
+      - run: pnpm run test
+      # TODO: `next lint` isn't configured in this project yet (interactive
+      # setup prompt). Add an ESLint config (with max-lines) then enable here.
+
+  conventions:
+    name: Conventions (commits · file length)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      # New/changed source files must stay small (see scripts/check-file-length.mjs).
+      # PR-only: it's a pre-merge review gate. Direct pushes to main skip it
+      # (otherwise touching any pre-existing large file fails the push).
+      - name: File length gate
+        if: github.event_name == 'pull_request'
+        run: node scripts/check-file-length.mjs
+      # Conventional Commits on PR commits (non-blocking on push to main).
+      - name: Commit message lint
+        if: github.event_name == 'pull_request'
+        run: >
+          npx --yes --package @commitlint/cli --package @commitlint/config-conventional
+          commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.sha }}

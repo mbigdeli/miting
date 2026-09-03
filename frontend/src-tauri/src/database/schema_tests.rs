@@ -1,0 +1,99 @@
+//! Migration-chain integration tests (fills the database/ test gap, doc 09/A3).
+//! Applies the full embedded migration set to a fresh in-memory DB and asserts
+//! new columns exist — guards every migration against a broken chain.
+
+use sqlx::sqlite::SqlitePoolOptions;
+use sqlx::SqlitePool;
+
+async fn fresh_migrated_pool() -> SqlitePool {
+    // max_connections(1): a multi-connection `:memory:` pool would give each
+    // connection its own empty DB — migrate and query must share one.
+    let pool = SqlitePoolOptions::new()
+        .max_connections(1)
+        .connect("sqlite::memory:")
+        .await
+        .expect("open in-memory sqlite");
+    sqlx::migrate!("./migrations")
+        .run(&pool)
+        .await
+        .expect("all migrations apply cleanly on a fresh DB");
+    pool
+}
+
+async fn columns(pool: &SqlitePool, table: &str) -> Vec<String> {
+    sqlx::query_scalar::<_, String>(&format!("SELECT name FROM pragma_table_info('{table}')"))
+        .fetch_all(pool)
+        .await
+        .expect("read table_info")
+}
+
+#[tokio::test]
+async fn full_migration_chain_applies_on_fresh_db() {
+    // The mere fact that this returns without panicking proves the chain is intact.
+    let _pool = fresh_migrated_pool().await;
+}
+
+#[tokio::test]
+async fn meetings_library_columns_present() {
+    let pool = fresh_migrated_pool().await;
+    let cols = columns(&pool, "meetings").await;
+    assert!(cols.contains(&"starred".to_string()), "missing starred: {cols:?}");
+    assert!(cols.contains(&"duration_sec".to_string()), "missing duration_sec: {cols:?}");
+    assert!(cols.contains(&"template_id".to_string()), "missing template_id: {cols:?}");
+}
+
+#[tokio::test]
+async fn meeting_templates_table_present() {
+    let pool = fresh_migrated_pool().await;
+    let cols = columns(&pool, "meeting_templates").await;
+    assert!(cols.contains(&"prompt_body".to_string()), "missing prompt_body: {cols:?}");
+    assert!(cols.contains(&"is_default".to_string()), "missing is_default: {cols:?}");
+}
+
+#[tokio::test]
+async fn integration_settings_table_present() {
+    let pool = fresh_migrated_pool().await;
+    let cols = columns(&pool, "integration_settings").await;
+    assert!(cols.contains(&"key".to_string()), "missing key: {cols:?}");
+    assert!(cols.contains(&"value".to_string()), "missing value: {cols:?}");
+}
+
+#[tokio::test]
+async fn meetings_carry_transcription_attribution() {
+    let pool = fresh_migrated_pool().await;
+    let cols = columns(&pool, "meetings").await;
+    assert!(
+        cols.contains(&"transcription_engine".to_string()),
+        "missing transcription_engine: {cols:?}"
+    );
+    assert!(
+        cols.contains(&"transcription_model".to_string()),
+        "missing transcription_model: {cols:?}"
+    );
+}
+
+/// Meetings saved before the stamping migration keep working: the columns are
+/// nullable, so old rows read back as NULL rather than failing the query.
+#[tokio::test]
+async fn pre_existing_meetings_read_back_with_null_attribution() {
+    let pool = fresh_migrated_pool().await;
+    sqlx::query("INSERT INTO meetings (id, title, created_at, updated_at) VALUES (?, ?, ?, ?)")
+        .bind("meeting-legacy")
+        .bind("Recorded before stamping")
+        .bind("2026-01-01T00:00:00Z")
+        .bind("2026-01-01T00:00:00Z")
+        .execute(&pool)
+        .await
+        .expect("insert legacy meeting");
+
+    let (engine, model): (Option<String>, Option<String>) = sqlx::query_as(
+        "SELECT transcription_engine, transcription_model FROM meetings WHERE id = ?",
+    )
+    .bind("meeting-legacy")
+    .fetch_one(&pool)
+    .await
+    .expect("read legacy meeting");
+
+    assert_eq!(engine, None);
+    assert_eq!(model, None);
+}

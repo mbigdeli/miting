@@ -1,0 +1,32 @@
+{
+  "name": "Standard Miting Notes",
+  "description": "The default recap: summary, decisions, action items, and highlights.",
+  "sections": [
+    {
+      "title": "Summary",
+      "instruction": "One tight paragraph a person who missed the miting can rely on: what it was about, what changed, and what happens next. Use only what the transcript supports — no invented context, names, or dates.",
+      "format": "paragraph"
+    },
+    {
+      "title": "Key Decisions",
+      "instruction": "Decisions actually made, phrased to stand alone ('We will X' rather than 'discussed X'). Exclude options that were only debated. If no decisions were made, write 'No decisions made.'",
+      "format": "list"
+    },
+    {
+      "title": "Action Items",
+      "instruction": "Every task someone agreed to do. Extract the owner from who accepted the task (use their name as spoken; '—' if unclear) and the due date only if one was said. Include the transcript snippet and timestamp that justifies each row.",
+      "format": "list",
+      "item_format": "| **Owner** | **Task** | **Due** | **Reference** | **Timestamp** |\n| --- | --- | --- | --- | --- |"
+    },
+    {
+      "title": "Discussion Highlights",
+      "instruction": "The substance worth remembering: main topics, strongest arguments on each side, and insights or numbers that changed the conversation. Keep it to the transcript's actual content.",
+      "format": "paragraph"
+    },
+    {
+      "title": "Open Questions",
+      "instruction": "Anything raised but left unresolved. If everything was settled, write 'None.'",
+      "format": "list"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Miting Companion — microphone access</title>
+    <link rel="icon" type="image/png" href="./favicon.png" />
+  </head>
+  <body>
+    <main class="card">
+      <img class="logo" src="./logo.png" alt="" />
+      <h1>Allow your microphone</h1>
+      <p>
+        Chrome only grants microphone access from an extension page. Allow it once and your own
+        voice is recorded alongside the meeting audio.
+      </p>
+      <button id="grant" type="button">Allow microphone</button>
+      <p id="status" class="status" role="status"></p>
+    </main>
+    <script type="module" src="./src/permission/main.ts"></script>
+  </body>
+</html>

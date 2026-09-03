@@ -1,0 +1,39 @@
+{
+  "name": "Client & Sales Call",
+  "description": "Client-call recap: needs, objections, commitments, and follow-ups.",
+  "sections": [
+    {
+      "title": "Call Summary",
+      "instruction": "Two or three sentences: who the client is, why the call happened, and how it ended (advance, stall, or next step). Ground everything in the transcript — never embellish the client's level of interest.",
+      "format": "paragraph"
+    },
+    {
+      "title": "Client Needs & Goals",
+      "instruction": "What the client said they want to achieve, the problems behind it, and any success criteria they stated — in their own words where possible.",
+      "format": "paragraph"
+    },
+    {
+      "title": "Objections & Concerns",
+      "instruction": "Every hesitation, objection, or concern the client voiced, with the response given on the call ('—' if it went unanswered). If the client raised none, write 'None voiced.'",
+      "format": "list",
+      "item_format": "| **Concern** | **Response given** |\n| --- | --- |"
+    },
+    {
+      "title": "Commercials Discussed",
+      "instruction": "Pricing, terms, timelines, or contract points actually mentioned, with exact figures only if stated. If commercials never came up, write 'Not discussed.'",
+      "format": "paragraph"
+    },
+    {
+      "title": "Commitments",
+      "instruction": "What each side promised — deliverables, intros, trials, documents — with owner and due date if stated ('—' otherwise). A commitment is only listed if someone clearly agreed to it. If none, write 'No commitments made.'",
+      "format": "list",
+      "item_format": "| **Who** | **Commitment** | **Due** |\n| --- | --- | --- |"
+    },
+    {
+      "title": "Follow-ups",
+      "instruction": "The concrete next steps to keep the deal moving, each with an owner. End with the agreed next touchpoint if one was scheduled.",
+      "format": "list",
+      "item_format": "| **Owner** | **Next step** | **When** |\n| --- | --- | --- |"
+    }
+  ]
+}

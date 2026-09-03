@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!--
+    Miting app icon: the three-bar mark (tall / short / tall — an abstracted
+    "M", also a level meter) in white on the brand teal, on a rounded square
+    so it reads as a platform app tile at every size.
+    Brand teal #00857A = hsl(175 100% 26%), the tweakcn Future Teal accent.
+  -->
+  <rect width="1024" height="1024" rx="224" ry="224" fill="#00857A"/>
+  <!-- Mark scaled about the tile centre so it sits inside the safe area
+       instead of running edge-to-edge (the source art is full-bleed). -->
+  <g fill="#FFFFFF" transform="translate(512 512) scale(0.62) translate(-512 -512)">
+    <path d="m192.11 72c52.52 0 95.1 42.58 95.1 95.11v690.45c0 52.53-42.58 95.11-95.1 95.11-52.53 0-95.11-42.58-95.11-95.11v-690.45c0-52.53 42.58-95.11 95.11-95.11z"/>
+    <path d="m515.62 371.55c52.52 0 95.1 42.58 95.1 95.1v390.91c0 52.53-42.58 95.11-95.1 95.11-52.53 0-95.11-42.58-95.11-95.11v-390.91c0-52.52 42.58-95.1 95.11-95.1z"/>
+    <path d="m831.64 72c52.53 0 95.11 42.58 95.11 95.11v690.45c0 52.53-42.58 95.11-95.11 95.11-52.53 0-95.11-42.58-95.11-95.11v-690.45c0-52.53 42.58-95.11 95.11-95.11z"/>
+  </g>
+</svg>
