@@ -100,6 +100,10 @@ async function ensureDefaultSettingsPersisted(): Promise<void> {
 }
 
 async function refreshServiceHealth(_ensureTray = false): Promise<void> {
+  // Pair first: `/gmeet/health` is reachable without a token, but the popup
+  // treats a missing pairing as "Desktop app unavailable". On macOS the host
+  // now reads Application Support; this call is what stores the token.
+  await ensureGmeetPairing();
   // Miting: health is the miting desktop app's HTTP gmeet ingest server,
   // NOT the retired Native Messaging host. (The old native host is uninstalled,
   // so serviceClient.checkHealth would always report "unavailable" and block

@@ -104,12 +104,19 @@ mod tests {
     }
 
     #[test]
-    fn falls_back_to_dev_build_name() {
+    fn falls_back_to_later_candidate() {
         let dir = temp_dir("dev_only");
-        std::fs::write(dir.join(APP_BINARY_NAMES[1]), b"stub").unwrap();
+        // "miting" and "Miting" are the same file on default macOS APFS.
+        // Use a name that is not a case-variant of the preferred binary.
+        let fallback = APP_BINARY_NAMES
+            .iter()
+            .copied()
+            .find(|name| !name.eq_ignore_ascii_case(APP_BINARY_NAMES[0]))
+            .expect("a distinct fallback binary name");
+        std::fs::write(dir.join(fallback), b"stub").unwrap();
         let found = find_app_exe(&dir).unwrap();
         assert!(
-            found.ends_with(APP_BINARY_NAMES[1]),
+            found.ends_with(fallback),
             "found: {}",
             found.display()
         );
