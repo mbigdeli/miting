@@ -1,0 +1,124 @@
+# Pinned local toolchain. Install with `mise install`; run tasks with `mise run <task>`.
+
+[tools]
+node = "20"
+pnpm = "10"
+rust = { version = "stable", components = ["rustfmt", "clippy"] }
+
+[tasks.setup]
+description = "Install the pinned toolchain and JavaScript dependencies"
+run = "mise install && mise run install"
+
+[tasks.install]
+description = "Install frontend (pnpm) and extension (npm) dependencies"
+run = """
+pnpm --dir frontend install --no-frozen-lockfile
+npm ci --prefix extension
+"""
+
+[tasks.dev]
+description = "Run the Next.js frontend on port 3118"
+dir = "frontend"
+run = "pnpm run dev"
+
+[tasks.tauri-dev]
+description = "Run the Tauri desktop application with automatic GPU detection"
+dir = "frontend"
+run = "pnpm run tauri:dev"
+
+[tasks.build-frontend]
+description = "Build the production Next.js frontend"
+dir = "frontend"
+run = "pnpm run build"
+
+[tasks.build-extension]
+description = "Build the companion Chrome extension"
+dir = "extension"
+run = "npm run build"
+
+[tasks.build-sidecars]
+description = "Build debug sidecars into frontend/src-tauri/binaries"
+run = "node scripts/build-sidecars.mjs"
+
+[tasks.build-sidecars-release]
+description = "Build release sidecars into frontend/src-tauri/binaries"
+run = "node scripts/build-sidecars.mjs --release"
+
+[tasks.sync-extension]
+description = "Copy extension/dist into the Tauri resource tree"
+run = "node scripts/sync-extension-dist.mjs"
+
+[tasks.build-tauri]
+description = "Build the production Tauri installer"
+dir = "frontend"
+run = "pnpm run tauri:build"
+
+[tasks.release-build]
+description = "Install dependencies, bundle the extension, and build release installers"
+depends = ["install"]
+run = """
+npm --prefix extension run build
+node scripts/sync-extension-dist.mjs --require
+pnpm --dir frontend run tauri:build
+"""
+
+[tasks.typecheck-frontend]
+description = "Type-check the frontend"
+dir = "frontend"
+run = "pnpm run typecheck"
+
+[tasks.typecheck-extension]
+description = "Type-check the extension"
+dir = "extension"
+run = "npm run typecheck"
+
+[tasks.typecheck]
+description = "Type-check the frontend and extension"
+depends = ["typecheck-frontend", "typecheck-extension"]
+
+[tasks.test-frontend]
+description = "Run frontend unit tests"
+dir = "frontend"
+run = "pnpm run test"
+
+[tasks.test-extension]
+description = "Run extension unit tests"
+dir = "extension"
+run = "npm test"
+
+[tasks.test-rust]
+description = "Run the same Rust library tests as CI"
+run = "cargo test --manifest-path frontend/src-tauri/Cargo.toml --lib -- --skip audio:: --skip whisper --skip parakeet"
+
+[tasks.test]
+description = "Run frontend, extension, and Rust unit tests"
+depends = ["test-frontend", "test-extension", "test-rust"]
+
+[tasks.release-check]
+description = "Run type checks and unit tests before a release build"
+depends = ["typecheck", "test"]
+
+[tasks.e2e-extension]
+description = "Run Playwright tests for the unpacked extension"
+dir = "extension"
+run = "npm run e2e"
+
+[tasks.fmt]
+description = "Format the Rust workspace"
+run = "cargo fmt --all"
+
+[tasks.fmt-check]
+description = "Check Rust formatting"
+run = "cargo fmt --all --check"
+
+[tasks.clippy]
+description = "Run Clippy against the Tauri library"
+run = "cargo clippy --manifest-path frontend/src-tauri/Cargo.toml --lib -- -D warnings"
+
+[tasks.check-file-length]
+description = "Run the pull-request source-file length check"
+run = "node scripts/check-file-length.mjs"
+
+[tasks.ci]
+description = "Run the local CI-equivalent quality checks"
+depends = ["typecheck", "test", "check-file-length"]
