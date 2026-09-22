@@ -175,7 +175,11 @@ mod tests {
         assert_eq!(minted, reread, "second read returns the persisted token");
 
         std::fs::write(tmp.join(TOKEN_FILE), "  fixed-token\n").unwrap();
-        assert_eq!(load_or_create_token().unwrap(), "fixed-token", "existing file wins, trimmed");
+        assert_eq!(
+            load_or_create_token().unwrap(),
+            "fixed-token",
+            "existing file wins, trimmed"
+        );
 
         let _ = std::fs::remove_dir_all(&tmp);
     }

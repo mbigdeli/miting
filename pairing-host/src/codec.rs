@@ -50,7 +50,10 @@ mod tests {
         let mut cursor = std::io::Cursor::new(buf);
         let back = read_message(&mut cursor).unwrap().unwrap();
         assert_eq!(back, msg);
-        assert!(read_message(&mut cursor).unwrap().is_none(), "clean EOF after one frame");
+        assert!(
+            read_message(&mut cursor).unwrap().is_none(),
+            "clean EOF after one frame"
+        );
     }
 
     #[test]

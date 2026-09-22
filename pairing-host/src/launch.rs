@@ -115,10 +115,6 @@ mod tests {
             .expect("a distinct fallback binary name");
         std::fs::write(dir.join(fallback), b"stub").unwrap();
         let found = find_app_exe(&dir).unwrap();
-        assert!(
-            found.ends_with(fallback),
-            "found: {}",
-            found.display()
-        );
+        assert!(found.ends_with(fallback), "found: {}", found.display());
     }
 }
