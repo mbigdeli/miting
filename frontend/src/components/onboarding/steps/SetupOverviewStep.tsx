@@ -8,7 +8,7 @@ const STEPS = [
   {
     number: 1,
     title: 'Transcription engine',
-    description: 'Turns speech into text · Parakeet, ~670 MB',
+    description: 'Turns speech into text',
   },
   {
     number: 2,

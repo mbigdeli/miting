@@ -3,6 +3,7 @@
 /** One model row in the redesigned Transcription settings (brand accents). */
 
 import { Check, Download, RotateCcw, Trash2, X } from 'lucide-react';
+import { formatEngineSize } from '@/lib/modelSize';
 import type { EngineModel } from './types';
 
 const ACTION =
@@ -47,7 +48,7 @@ export function ModelCard({
         <div className="min-w-0">
           <p className="text-[13.5px] font-semibold text-zinc-900">{model.displayName}</p>
           {model.description && <p className="mt-px text-xs text-zinc-500">{model.description}</p>}
-          <p className="mt-1 text-[11.5px] text-zinc-400">{model.sizeMb} MB</p>
+          <p className="mt-1 text-[11.5px] text-zinc-400">{formatEngineSize(model.sizeMb)}</p>
         </div>
 
         {downloading ? (

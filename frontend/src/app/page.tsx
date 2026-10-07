@@ -2,7 +2,6 @@
 import { toast } from 'sonner';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { RecordingStatus } from '@/contexts/RecordingStateContext';
 import { useTranscripts } from '@/contexts/TranscriptContext';
 import { useImportDialog } from '@/contexts/ImportDialogContext';
@@ -18,15 +17,13 @@ import { RecordingHeader } from '@/components/record/RecordingHeader';
 import { DeviceErrorAlert } from '@/components/record/DeviceErrorAlert';
 import { TranscriptionOffNotice } from '@/components/record/TranscriptionOffNotice';
 import { useLiveTranscriptionState } from '@/components/record/useLiveTranscriptionState';
-import { SetupChecklistCard } from '@/components/setup/SetupChecklistCard';
-import { useSetupStatus } from '@/components/setup/useSetupStatus';
+import { HomeSetupSteps } from '@/components/setup/HomeSetupSteps';
 
 /**
  * Record screen (mockups 2e + 2f): a start-recording hero when idle, and the
  * live transcript view (header + centered stream) while recording.
  */
 export default function Home() {
-  const router = useRouter();
   const { meetingTitle, transcripts, copyTranscript } = useTranscripts();
   const { openImportDialog } = useImportDialog();
   const {
@@ -46,18 +43,13 @@ export default function Home() {
   } = useRecordScreen();
   const { status, isStopping, isSaving, isPaused } = recordingState;
   const liveTranscription = useLiveTranscriptionState();
-  const setup = useSetupStatus();
-
-  // Land on the pane that actually fixes the gap, not on Settings' first tab.
-  const openSetupFor = (id: 'transcription' | 'summary') =>
-    id === 'transcription' ? showModal('modelSelector') : router.push('/settings?tab=summaryModels');
 
   useEffect(() => {
     Analytics.trackPageView('home');
   }, []);
 
   return (
-    <div className="flex h-screen flex-col bg-zinc-50 font-inter text-zinc-950">
+    <div className="relative flex h-screen flex-col bg-zinc-50 font-inter text-zinc-950">
       <SettingsModals modals={modals} messages={messages} onClose={hideModal} />
       <HomeRecovery
         pauseChecks={recordingState.isRecording || isStopping || isProcessingStop || isSaving}
@@ -99,8 +91,9 @@ export default function Home() {
         </>
       ) : (
         <>
-          <div className="flex items-center justify-end px-7 pt-5">
-            <ModelPicker onSetUpModels={() => showModal('modelSelector')} />
+          {/* Floats over the hero so the centered column uses the full height. */}
+          <div className="absolute right-7 top-5 z-40">
+            <ModelPicker />
           </div>
           <RecordHero
             onStart={controls.handleStart}
@@ -109,15 +102,9 @@ export default function Home() {
               isRecordingDisabled || (!permissions.hasMicrophone && !permissions.isChecking)
             }
             isStarting={controls.isStarting || status === RecordingStatus.STARTING}
+            below={<HomeSetupSteps />}
           >
             <DeviceErrorAlert error={controls.deviceError} onDismiss={controls.clearDeviceError} />
-            {setup.visible && (
-              <SetupChecklistCard
-                items={setup.items}
-                onAction={openSetupFor}
-                onDismiss={() => void setup.dismiss()}
-              />
-            )}
           </RecordHero>
         </>
       )}

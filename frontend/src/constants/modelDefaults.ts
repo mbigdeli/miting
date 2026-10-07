@@ -16,6 +16,9 @@ export const DEFAULT_WHISPER_MODEL = 'large-v3-turbo';
 export const DEFAULT_PARAKEET_MODEL = 'parakeet-tdt-0.6b-v3-int8';
 export const DEFAULT_SHENAVA_MODEL = 'shenava-rizeh-v1.0';
 
+/** The Shenava model the setup steps offer: its most accurate one (Koochik). */
+export const RECOMMENDED_SHENAVA_MODEL = 'shenava-koochik-v1.0';
+
 /**
  * Model defaults by provider type
  */

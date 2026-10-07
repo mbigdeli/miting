@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { toast } from 'sonner';
 import { X, Download, Check, Loader2, ArrowBigDownDash } from 'lucide-react';
-import { getDownloadTotalMb } from '@/lib/onboarding-summary-model';
 
 interface DownloadProgress {
   modelName: string;
@@ -126,6 +125,13 @@ function DownloadToastContent({
 export function useDownloadProgressToast() {
   const [downloads, setDownloads] = useState<Map<string, DownloadProgress>>(new Map());
   const [dismissedModels, setDismissedModels] = useState<Set<string>>(new Set());
+  // Sizes come only from the backend's progress events. Completion and error
+  // events carry none, so they reuse the last size a progress event reported.
+  const lastTotals = useRef<Record<string, number>>({});
+  const totalFor = useCallback((name: string, reported?: number) => {
+    if (reported) lastTotals.current[name] = reported;
+    return lastTotals.current[name] ?? 0;
+  }, []);
 
   const updateDownload = useCallback((modelName: string, data: Partial<DownloadProgress>) => {
     setDownloads((prev) => {
@@ -236,7 +242,7 @@ export function useDownloadProgressToast() {
         displayName: 'Transcription Model (Parakeet)',
         progress,
         downloadedMb: downloaded_mb ?? 0,
-        totalMb: total_mb ?? 670,
+        totalMb: totalFor(modelName, total_mb),
         speedMbps: speed_mbps ?? 0,
         status: status === 'cancelled'
           ? 'cancelled'
@@ -262,8 +268,8 @@ export function useDownloadProgressToast() {
           modelName,
           displayName: 'Transcription Model (Parakeet)',
           progress: 100,
-          downloadedMb: 670,
-          totalMb: 670,
+          downloadedMb: totalFor(modelName),
+          totalMb: totalFor(modelName),
           speedMbps: 0,
           status: 'completed',
         };
@@ -282,7 +288,7 @@ export function useDownloadProgressToast() {
           displayName: 'Transcription Model (Parakeet)',
           progress: 0,
           downloadedMb: 0,
-          totalMb: 670,
+          totalMb: totalFor(modelName),
           speedMbps: 0,
           status: 'error',
           error: categorizeError(error),
@@ -298,7 +304,7 @@ export function useDownloadProgressToast() {
       unlistenComplete.then((fn) => fn());
       unlistenError.then((fn) => fn());
     };
-  }, [updateDownload, cleanupDownload]);
+  }, [updateDownload, cleanupDownload, totalFor]);
 
   // Listen to Built-in AI summary model download events
   useEffect(() => {
@@ -318,7 +324,7 @@ export function useDownloadProgressToast() {
         displayName: `Summary Model (${model})`,
         progress: progress ?? 0,
         downloadedMb: downloaded_mb ?? 0,
-        totalMb: getDownloadTotalMb(total_mb, model),
+        totalMb: totalFor(model, total_mb),
         speedMbps: speed_mbps ?? 0,
         unitLabel: 'MiB',
         status: status === 'completed' || progress >= 100
@@ -346,7 +352,7 @@ export function useDownloadProgressToast() {
     return () => {
       unlisten.then((fn) => fn());
     };
-  }, [updateDownload, cleanupDownload]);
+  }, [updateDownload, cleanupDownload, totalFor]);
 
   return { downloads };
 }

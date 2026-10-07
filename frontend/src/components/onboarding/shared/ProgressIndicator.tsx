@@ -1,5 +1,4 @@
 import React from 'react';
-import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ProgressIndicatorProps {
@@ -9,8 +8,9 @@ interface ProgressIndicatorProps {
 }
 
 /**
- * Onboarding step rail: small numbered dots joined by connectors.
- * Completed steps show a check and darken the connector that follows them.
+ * Onboarding step rail: plain dots joined by connectors. No numbers, so the
+ * numbered steps inside the models screen (1 and 2) are the only ones.
+ * Finished steps stay clickable.
  */
 export function ProgressIndicator({ current, total, onStepClick }: ProgressIndicatorProps) {
   const steps = Array.from({ length: total }, (_, i) => i + 1);
@@ -31,15 +31,12 @@ export function ProgressIndicator({ current, total, onStepClick }: ProgressIndic
               aria-label={`Step ${step}`}
               aria-current={isActive ? 'step' : undefined}
               className={cn(
-                'grid h-5 w-5 place-items-center rounded-full text-[10px] font-semibold transition-colors',
-                isCompleted || isActive
-                  ? 'bg-zinc-900 text-white'
-                  : 'border border-zinc-200 bg-white text-zinc-400',
-                isClickable ? 'cursor-pointer' : 'cursor-default'
+                'h-2 w-2 rounded-full transition-colors',
+                isCompleted || isActive ? 'bg-zinc-900' : 'border border-zinc-300 bg-white',
+                isActive && 'ring-[3px] ring-zinc-900/15',
+                isClickable ? 'cursor-pointer' : 'cursor-default',
               )}
-            >
-              {isCompleted ? <Check className="h-2.5 w-2.5" strokeWidth={3.5} /> : step}
-            </button>
+            />
 
             {index < steps.length - 1 && (
               <span

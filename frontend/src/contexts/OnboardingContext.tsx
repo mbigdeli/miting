@@ -5,8 +5,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import type { PermissionStatus, OnboardingPermissions } from '@/types/onboarding';
 import { resolveOnboardingSummaryModelStatus } from '@/lib/onboarding-summary-model';
-
-const PARAKEET_MODEL = 'parakeet-tdt-0.6b-v3-int8';
+import { DEFAULT_PARAKEET_MODEL as PARAKEET_MODEL } from '@/constants/modelDefaults';
 
 interface OnboardingStatus {
   version: string;
@@ -488,11 +487,14 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       });
       setSummaryModelDownloaded(selectedModelReady);
 
-      // Onboarding always uses builtin-ai with selected model
+      // The setup steps already saved whatever the user picked (a finished
+      // model, a connected plan); keepChoices stops completion from resetting
+      // them to builtin-ai and Parakeet.
       await invoke('complete_onboarding', {
         model: modelToSave,
         parakeetDownloaded,
         summaryDownloaded: selectedModelReady,
+        keepChoices: true,
       });
       setCompleted(true);
       console.log('[OnboardingContext] Onboarding completed with model:', modelToSave);

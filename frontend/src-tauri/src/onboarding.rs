@@ -177,35 +177,43 @@ pub async fn complete_onboarding<R: Runtime>(
     // answer when the user skipped the downloads.
     parakeet_downloaded: Option<bool>,
     summary_downloaded: Option<bool>,
+    // The setup steps save each pick the moment the user makes it (a model
+    // that finished downloading, a connected Claude or ChatGPT plan). When
+    // set, completing must leave those saved choices alone.
+    keep_choices: Option<bool>,
 ) -> Result<(), String> {
     info!("Completing onboarding with builtin-ai model: {}", model);
 
     // Step 1: Save model configuration to SQLite database FIRST
     let pool = state.db_manager.pool();
 
-    // Onboarding always uses builtin-ai (local LLM)
-    if let Err(e) = SettingsRepository::save_model_config(
-        pool,
-        "builtin-ai",
-        &model,
-        "large-v3",
-        None,
-    ).await {
-        error!("Failed to save builtin-ai model config: {}", e);
-        return Err(format!("Failed to save builtin-ai model config: {}", e));
-    }
-    info!("Saved builtin-ai model config: model={}", model);
+    if writes_default_configs(keep_choices) {
+        // Older frontends: onboarding always used builtin-ai (local LLM)
+        if let Err(e) = SettingsRepository::save_model_config(
+            pool,
+            "builtin-ai",
+            &model,
+            "large-v3",
+            None,
+        ).await {
+            error!("Failed to save builtin-ai model config: {}", e);
+            return Err(format!("Failed to save builtin-ai model config: {}", e));
+        }
+        info!("Saved builtin-ai model config: model={}", model);
 
-    // Save transcription model config (parakeet provider) - always parakeet
-    if let Err(e) = SettingsRepository::save_transcript_config(
-        pool,
-        "parakeet",
-        crate::config::DEFAULT_PARAKEET_MODEL,
-    ).await {
-        error!("Failed to save transcription model config: {}", e);
-        return Err(format!("Failed to save transcription model config: {}", e));
+        // Save transcription model config (parakeet provider) - always parakeet
+        if let Err(e) = SettingsRepository::save_transcript_config(
+            pool,
+            "parakeet",
+            crate::config::DEFAULT_PARAKEET_MODEL,
+        ).await {
+            error!("Failed to save transcription model config: {}", e);
+            return Err(format!("Failed to save transcription model config: {}", e));
+        }
+        info!("Saved transcription model config: provider=parakeet, model={}", crate::config::DEFAULT_PARAKEET_MODEL);
+    } else {
+        info!("Keeping the model choices made during setup");
     }
-    info!("Saved transcription model config: provider=parakeet, model={}", crate::config::DEFAULT_PARAKEET_MODEL);
 
     // Step 2: Only NOW mark onboarding as complete (after DB operations succeed)
     let mut status = load_onboarding_status(&app)
@@ -220,6 +228,13 @@ pub async fn complete_onboarding<R: Runtime>(
 
     info!("Onboarding completed successfully with model: {}", model);
     Ok(())
+}
+
+/// Whether completing onboarding should write the old fixed defaults
+/// (builtin-ai summaries, Parakeet transcription). A frontend that omits the
+/// flag predates the setup steps and still expects them.
+fn writes_default_configs(keep_choices: Option<bool>) -> bool {
+    !keep_choices.unwrap_or(false)
 }
 
 /// Stamp completion, recording what was actually downloaded.
@@ -304,6 +319,17 @@ mod tests {
         let status = completed_status(fresh_status(), "qwen3.5:4b", Some(true), Some(true));
         assert_eq!(status.model_status.parakeet, "downloaded");
         assert_eq!(status.model_status.summary, "downloaded");
+    }
+
+    #[test]
+    fn choices_made_in_the_setup_steps_are_kept() {
+        assert!(!writes_default_configs(Some(true)));
+    }
+
+    #[test]
+    fn an_older_frontend_still_gets_the_default_configs() {
+        assert!(writes_default_configs(None));
+        assert!(writes_default_configs(Some(false)));
     }
 
     #[test]

@@ -4,6 +4,7 @@ import {
   modelKey,
   optionLabel,
   toConfigProvider,
+  type PickerModel,
 } from '@/components/record/modelPickerOptions';
 
 describe('provider mapping', () => {
@@ -21,17 +22,29 @@ describe('provider mapping', () => {
 });
 
 describe('optionLabel', () => {
-  test('shows engine and model name', () => {
-    expect(optionLabel({ provider: 'whisper', name: 'large-v3' })).toBe('Whisper · large-v3');
-    expect(optionLabel({ provider: 'parakeet', name: 'tdt-0.6b-v2' })).toBe(
-      'Parakeet · tdt-0.6b-v2',
-    );
+  const parakeet: PickerModel = { provider: 'parakeet', name: 'parakeet-tdt-0.6b-v3-int8' };
+  const koochik: PickerModel = { provider: 'shenava', name: 'koochik', displayName: 'Koochik' };
+  const turbo: PickerModel = { provider: 'whisper', name: 'large-v3-turbo' };
+  const base: PickerModel = { provider: 'whisper', name: 'base' };
+
+  test('shows the plain engine name when it is the only model of its engine', () => {
+    const all = [parakeet, koochik, turbo];
+    expect(optionLabel(parakeet, all)).toBe('Parakeet');
+    expect(optionLabel(koochik, all)).toBe('Shenava');
+    expect(optionLabel(turbo, all)).toBe('Whisper');
   });
 
-  test('shenava is marked FA and prefers its display name', () => {
-    expect(optionLabel({ provider: 'shenava', name: 'koochik', displayName: 'Koochik' })).toBe(
-      'Shenava · Koochik — FA',
-    );
+  test('adds the model name when one engine has two models', () => {
+    const all = [turbo, base, koochik];
+    expect(optionLabel(turbo, all)).toBe('Whisper · large-v3-turbo');
+    expect(optionLabel(base, all)).toBe('Whisper · base');
+    expect(optionLabel(koochik, all)).toBe('Shenava');
+  });
+
+  test('prefers the display name and never shows a dash of its own', () => {
+    const rizeh: PickerModel = { provider: 'shenava', name: 'rizeh', displayName: 'Rizeh' };
+    expect(optionLabel(koochik, [koochik, rizeh])).toBe('Shenava · Koochik');
+    expect(optionLabel(koochik)).not.toMatch(/[–—]/);
   });
 });
 

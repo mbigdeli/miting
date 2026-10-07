@@ -2,76 +2,39 @@
 
 /**
  * Transcription-model picker pinned to the top of the record screen. Lists
- * only models already downloaded (status === 'Available') across the local
- * engines and persists the choice to the same config Settings uses.
+ * only models already downloaded across the local engines, persists the
+ * choice to the same config Settings uses, and offers "Add a model", which
+ * opens the Transcription tab of Settings.
  */
 
-import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { useRouter } from 'next/navigation';
+import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useConfig } from '@/contexts/ConfigContext';
 import { toErrorMessage } from '@/lib/utils';
+import { STEP_COPY } from '@/components/setup-steps/options';
 import {
   Select,
   SelectContent,
   SelectItem,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useDownloadedModels } from './useDownloadedModels';
 import { useTranscriptConfigHydration } from './useTranscriptConfigHydration';
-import {
-  PickerModel,
-  PickerProvider,
-  fromConfigProvider,
-  modelKey,
-  optionLabel,
-  toConfigProvider,
-} from './modelPickerOptions';
+import { fromConfigProvider, modelKey, optionLabel, toConfigProvider } from './modelPickerOptions';
 
-interface RawModel {
-  name: string;
-  display_name?: string;
-  status: unknown;
-}
+/** A value no real model can have; picking it opens Settings instead. */
+const ADD_MODEL = '__add_model__';
 
-const ENGINE_COMMANDS: [PickerProvider, string][] = [
-  ['parakeet', 'parakeet_get_available_models'],
-  ['whisper', 'whisper_get_available_models'],
-  ['shenava', 'shenava_get_available_models'],
-];
-
-export function ModelPicker({ onSetUpModels }: { onSetUpModels?: () => void } = {}) {
+export function ModelPicker() {
+  const router = useRouter();
   const { transcriptModelConfig, setTranscriptModelConfig } = useConfig();
-  const [models, setModels] = useState<PickerModel[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const { models, loaded } = useDownloadedModels();
 
   useTranscriptConfigHydration(setTranscriptModelConfig);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const downloaded: PickerModel[] = [];
-      for (const [provider, command] of ENGINE_COMMANDS) {
-        try {
-          const list = await invoke<RawModel[]>(command);
-          downloaded.push(
-            ...list
-              .filter((m) => m.status === 'Available')
-              .map((m) => ({ provider, name: m.name, displayName: m.display_name })),
-          );
-        } catch {
-          // Engine unavailable on this build — skip silently.
-        }
-      }
-      if (!cancelled) {
-        setModels(downloaded);
-        setLoaded(true);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const current = modelKey(
     fromConfigProvider(transcriptModelConfig?.provider),
@@ -80,6 +43,10 @@ export function ModelPicker({ onSetUpModels }: { onSetUpModels?: () => void } = 
   const hasCurrent = models.some((m) => modelKey(m.provider, m.name) === current);
 
   const handleChange = async (key: string) => {
+    if (key === ADD_MODEL) {
+      router.push(`/settings?tab=${STEP_COPY.transcription.settingsTab}`);
+      return;
+    }
     const picked = models.find((m) => modelKey(m.provider, m.name) === key);
     if (!picked) return;
     const provider = toConfigProvider(picked.provider) as typeof transcriptModelConfig.provider;
@@ -103,21 +70,9 @@ export function ModelPicker({ onSetUpModels }: { onSetUpModels?: () => void } = 
     setTranscriptModelConfig({ provider, model: picked.name, apiKey: null });
   };
 
-  if (!loaded) return null;
-
-  // With nothing downloaded this used to render nothing at all, leaving no clue
-  // that meetings would be recorded as audio only.
-  if (models.length === 0) {
-    return (
-      <button
-        type="button"
-        onClick={onSetUpModels}
-        className="rounded-lg border border-dashed border-zinc-300 px-3 py-1.5 text-[13px] font-medium text-zinc-600 hover:bg-white"
-      >
-        No transcription model — set one up
-      </button>
-    );
-  }
+  // With nothing downloaded the Home setup steps, which cannot be closed
+  // then, already offer the models; a second button here would compete.
+  if (!loaded || models.length === 0) return null;
 
   return (
     <div className="flex items-center gap-2">
@@ -132,9 +87,16 @@ export function ModelPicker({ onSetUpModels }: { onSetUpModels?: () => void } = 
         <SelectContent>
           {models.map((m) => (
             <SelectItem key={modelKey(m.provider, m.name)} value={modelKey(m.provider, m.name)}>
-              {optionLabel(m)}
+              {optionLabel(m, models)}
             </SelectItem>
           ))}
+          <SelectSeparator />
+          <SelectItem value={ADD_MODEL} className="font-medium text-brand focus:text-brand">
+            <span className="flex items-center gap-2">
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Add a model
+            </span>
+          </SelectItem>
         </SelectContent>
       </Select>
     </div>

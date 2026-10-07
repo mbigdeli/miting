@@ -24,9 +24,13 @@ const ENGINE_LABEL: Record<PickerProvider, string> = {
   shenava: 'Shenava',
 };
 
-/** "Whisper · large-v3", "Shenava · Koochik — FA" (Persian-only engine). */
-export function optionLabel(m: PickerModel): string {
-  const name = m.displayName || m.name;
-  const fa = m.provider === 'shenava' ? ' — FA' : '';
-  return `${ENGINE_LABEL[m.provider]} · ${name}${fa}`;
+/**
+ * The plain engine name ("Parakeet"), which is all the setup steps ever show.
+ * Only when two models of one engine are downloaded does the model name
+ * follow ("Whisper · large-v3"), so the entries stay distinguishable.
+ */
+export function optionLabel(m: PickerModel, all: PickerModel[] = [m]): string {
+  const engine = ENGINE_LABEL[m.provider];
+  const siblings = all.filter((other) => other.provider === m.provider).length;
+  return siblings > 1 ? `${engine} · ${m.displayName || m.name}` : engine;
 }

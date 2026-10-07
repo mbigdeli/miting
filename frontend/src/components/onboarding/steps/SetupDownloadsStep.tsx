@@ -1,88 +1,40 @@
-import React, { useCallback, useState } from 'react';
-import { Mic, Sparkles, Loader2 } from 'lucide-react';
-import { OnboardingContainer } from '../OnboardingContainer';
-import { EngineDownloadCard } from './download/EngineDownloadCard';
-import { useEngineDownload } from './download/useEngineDownload';
-import { useOnboarding } from '@/contexts/OnboardingContext';
+import React, { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { getSummaryModelSizeLabel, getSummaryModelSizeMb } from '@/lib/onboarding-summary-model';
+import { OnboardingContainer } from '../OnboardingContainer';
 import { useIsMac } from '../shared/useIsMac';
-
-const PARAKEET_MODEL = 'parakeet-tdt-0.6b-v3-int8';
-const PARAKEET_MB = 670;
+import { useOnboarding } from '@/contexts/OnboardingContext';
+import { continueLabel } from '@/lib/setupSteps';
+import { STEP_COPY } from '@/components/setup-steps/options';
+import { StepColumn } from '@/components/setup-steps/StepColumn';
+import { useAiStep } from '@/components/setup-steps/useAiStep';
+import { useTranscriptionStep } from '@/components/setup-steps/useTranscriptionStep';
 
 /**
- * Offers the optional downloads instead of starting them.
- *
- * Both models used to download automatically on mount, and Continue stayed
- * disabled until the ~670 MB transcription engine finished — on a slow
- * connection that is a wall on first launch. Recording works without either
- * model now, so this step recommends them and gets out of the way.
+ * Setup step 3: pick at least one transcription model and one way to write
+ * notes. Nothing downloads until the user asks, each pick is saved as soon
+ * as it is made, and "Skip for now" leaves the same choices for Home.
  */
 export function SetupDownloadsStep() {
-  const {
-    goNext,
-    selectedSummaryModel,
-    recommendedSummaryModel,
-    parakeetDownloaded,
-    setParakeetDownloaded,
-    summaryModelDownloaded,
-    setSummaryModelDownloaded,
-    startBackgroundDownloads,
-    completeOnboarding,
-  } = useOnboarding();
-
+  const { goNext, completeOnboarding } = useOnboarding();
   const isMac = useIsMac();
+  const transcription = useTranscriptionStep({ selectOnStart: true });
+  const ai = useAiStep();
   const [isCompleting, setIsCompleting] = useState(false);
+  // A step is covered by a pick made here or by one that already works
+  // (a model downloaded earlier, an API set up in Settings).
+  const transcriptionCovered = transcription.chosen || transcription.ready;
+  const aiCovered = ai.chosen || ai.ready;
+  const ready = transcriptionCovered && aiCovered;
 
-  const summaryModelName = selectedSummaryModel || recommendedSummaryModel;
-
-  const parakeet = useEngineDownload({
-    events: {
-      progress: 'parakeet-model-download-progress',
-      complete: 'parakeet-model-download-complete',
-      error: 'parakeet-model-download-error',
-    },
-    matches: useCallback((payload) => payload.modelName === PARAKEET_MODEL, []),
-    totalMb: PARAKEET_MB,
-    alreadyDownloaded: parakeetDownloaded,
-    start: () => startBackgroundDownloads({ includeParakeet: true, includeSummary: false }),
-    onDownloaded: useCallback(() => setParakeetDownloaded(true), [setParakeetDownloaded]),
-  });
-
-  const summary = useEngineDownload({
-    events: { progress: 'builtin-ai-download-progress' },
-    matches: useCallback(
-      (payload) => !!summaryModelName && payload.model === summaryModelName,
-      [summaryModelName]
-    ),
-    totalMb: getSummaryModelSizeMb(summaryModelName),
-    alreadyDownloaded: summaryModelDownloaded,
-    start: () =>
-      startBackgroundDownloads({
-        includeParakeet: false,
-        includeSummary: true,
-        summaryModel: summaryModelName!,
-      }),
-    onDownloaded: useCallback(() => setSummaryModelDownloaded(true), [setSummaryModelDownloaded]),
-  });
-
-  const anyDownloadRunning =
-    parakeet.state.status === 'downloading' || summary.state.status === 'downloading';
-
-  const handleContinue = async () => {
-    if (anyDownloadRunning) {
-      toast.info('Downloads will continue in the background', {
-        description: 'You can start using Miting now.',
-        duration: 5000,
-      });
+  const finish = async () => {
+    if (transcription.downloading) {
+      toast.info('Downloads will continue in the background', { duration: 5000 });
     }
-
     if (isMac) {
       goNext();
       return;
     }
-
     setIsCompleting(true);
     try {
       await completeOnboarding();
@@ -95,49 +47,44 @@ export function SetupDownloadsStep() {
     }
   };
 
-  const summarySizeLabel = getSummaryModelSizeLabel(summaryModelName);
-  const summarySubtitle = summaryModelName
-    ? [summaryModelName, summarySizeLabel].filter(Boolean).join(' · ')
-    : 'Preparing recommendation…';
-
   return (
-    <OnboardingContainer
-      title="Add the models"
-      step={3}
-      totalSteps={isMac ? 4 : 3}
-    >
-      <div className="mt-8 grid w-full max-w-[480px] gap-3.5">
-        <EngineDownloadCard
-          title="Transcription engine"
-          subtitle="Parakeet · ~670 MB · recommended"
-          icon={<Mic className="h-[17px] w-[17px] text-zinc-600" />}
-          state={parakeet.state}
-          onDownload={() => void parakeet.begin()}
-          onRetry={() => void parakeet.begin()}
+    <OnboardingContainer title="Set up text and notes" step={3} totalSteps={isMac ? 4 : 3}>
+      <div className="mt-8 flex items-start justify-center gap-4">
+        <StepColumn
+          {...STEP_COPY.transcription}
+          rows={transcription.rows}
+          done={transcription.ready}
+          variant="onboarding"
         />
-
-        <EngineDownloadCard
-          title="Summary engine"
-          subtitle={summarySubtitle}
-          icon={<Sparkles className="h-[17px] w-[17px] text-brand" />}
-          state={summary.state}
-          onDownload={summaryModelName ? () => void summary.begin() : undefined}
-          onRetry={() => void summary.begin()}
+        <StepColumn
+          {...STEP_COPY.ai}
+          rows={ai.rows}
+          done={ai.ready}
+          variant="onboarding"
         />
       </div>
 
       <button
         type="button"
-        onClick={handleContinue}
-        disabled={isCompleting}
-        className="mt-7 flex h-11 w-[280px] items-center justify-center rounded-lg bg-zinc-900 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40"
+        onClick={() => void finish()}
+        disabled={!ready || isCompleting}
+        className="mt-7 flex h-11 min-w-[280px] items-center justify-center rounded-lg bg-zinc-900 px-5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-zinc-900"
       >
-        {isCompleting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Continue'}
+        {isCompleting ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          continueLabel(transcriptionCovered, aiCovered)
+        )}
       </button>
 
-      {anyDownloadRunning && (
-        <p className="mt-2.5 text-xs text-zinc-400">Downloads keep running in the background.</p>
-      )}
+      <button
+        type="button"
+        onClick={() => void finish()}
+        disabled={isCompleting}
+        className="mt-4 text-xs text-zinc-400 transition-colors hover:text-zinc-600"
+      >
+        Skip for now
+      </button>
     </OnboardingContainer>
   );
 }
