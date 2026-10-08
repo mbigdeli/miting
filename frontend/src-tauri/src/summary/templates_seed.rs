@@ -11,7 +11,7 @@ const DEFAULTS: [(&str, &str, &str, &str); 4] = [
     (
         "default-standard", "Standard meeting", "📋",
         "Summarize this meeting. Produce a short overview, the key decisions \
-(each with who made it), and action items as `owner — task — due`.\n\nTranscript:\n{{transcript}}",
+(each with who made it), and action items as `owner: task (due date)`.\n\nTranscript:\n{{transcript}}",
     ),
     (
         "default-standup", "Daily standup", "🌅",
@@ -27,7 +27,7 @@ speakers' names.\n\nTranscript:\n{{transcript}}",
     (
         "default-standard-fa", "Standard meeting (فارسی)", "📋",
         "این جلسه را به زبان فارسی خلاصه کن. یک نمای کلی کوتاه، تصمیم‌های کلیدی، \
-و کارهای اقدام (مسئول — کار — مهلت) ارائه بده.\n\nمتن جلسه:\n{{transcript}}",
+و کارهای اقدام (مسئول: کار، مهلت) ارائه بده.\n\nمتن جلسه:\n{{transcript}}",
     ),
 ];
 

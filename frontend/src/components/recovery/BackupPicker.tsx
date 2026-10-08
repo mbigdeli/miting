@@ -24,7 +24,7 @@ export function BackupPicker({ backups, disabled, onRestore }: BackupPickerProps
     return (
       <p className="mt-3 text-[13px] text-zinc-500">
         No automatic backups were found. Your meetings may still be recoverable from the data
-        folder — starting fresh keeps the existing file rather than deleting it.
+        folder. Starting fresh keeps the existing file rather than deleting it.
       </p>
     );
   }

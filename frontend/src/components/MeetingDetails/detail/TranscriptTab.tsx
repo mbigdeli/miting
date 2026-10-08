@@ -77,7 +77,7 @@ export default function TranscriptTab(props: TranscriptTabProps) {
         />
         {q && !hasDiarized && props.hasMore && (
           <p className="mt-2 text-[11.5px] text-zinc-400">
-            Searching the {props.loadedCount ?? segments.length} loaded segments — scroll the full
+            Searching the {props.loadedCount ?? segments.length} loaded segments. Scroll the full
             transcript to load more.
           </p>
         )}

@@ -250,7 +250,7 @@ export function GmeetGraceController({ showOnboarding }: { showOnboarding: boole
   return (
     <div className="fixed bottom-4 right-4 z-[9999] flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-lg">
       <div className="flex flex-col">
-        <span className="text-sm font-medium text-gray-800">Miting ended — paused</span>
+        <span className="text-sm font-medium text-gray-800">Miting ended, paused</span>
         <span className="text-xs text-gray-500">
           Finalizing in {mm}:{ss} (rejoin to resume)
         </span>

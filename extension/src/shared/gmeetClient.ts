@@ -160,7 +160,12 @@ export async function checkGmeetHealth(): Promise<
     return { ok: false, error: "not_paired" };
   }
   try {
-    const resp = await fetch(`${pairing.baseUrl}/gmeet/health`);
+    // The app answers health either way, but only grades the token it is
+    // shown. Without the header `authorized` was always false, so the worker
+    // re-paired through the native host every minute.
+    const resp = await fetch(`${pairing.baseUrl}/gmeet/health`, {
+      headers: { Authorization: `Bearer ${pairing.token}` },
+    });
     if (!resp.ok) {
       return { ok: false, error: `http_${resp.status}` };
     }

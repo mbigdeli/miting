@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import { OnboardingContainer } from '../OnboardingContainer';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useIsMac } from '../shared/useIsMac';
+import { onboardingStepCount } from '../shared/stepCount';
 
 const STEPS = [
   {
@@ -26,7 +27,7 @@ export function SetupOverviewStep() {
       title="Setup overview"
       description="Two AI models power Miting: one to transcribe, one to summarize and reason. Download both, or use your ChatGPT or Claude plan for summaries."
       step={2}
-      totalSteps={isMac ? 4 : 3}
+      totalSteps={onboardingStepCount(isMac)}
     >
       <div className="mt-8 w-full max-w-[440px] rounded-xl border border-zinc-200 bg-white p-2">
         {STEPS.map((step, index) => (

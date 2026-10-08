@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { LAST_ONBOARDING_STEP } from '@/components/onboarding/shared/stepCount';
 import { listen } from '@tauri-apps/api/event';
 import type { PermissionStatus, OnboardingPermissions } from '@/types/onboarding';
 import { resolveOnboardingSummaryModelStatus } from '@/lib/onboarding-summary-model';
@@ -416,9 +417,9 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     let currentStep = savedStatus.current_step;
     let completed = savedStatus.completed;
 
-    // Clamp step to new max (4)
-    if (currentStep > 4) {
-      currentStep = 3; // Go to download progress step
+    // Clamp to the last step; anything past it resumes at the models step
+    if (currentStep > LAST_ONBOARDING_STEP) {
+      currentStep = 3;
     }
 
     // Trust the completed status - don't revert based on model downloads
@@ -587,14 +588,12 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   const goToStep = useCallback((step: number) => {
-    setCurrentStep(Math.max(1, Math.min(step, 4)));
+    setCurrentStep(Math.max(1, Math.min(step, LAST_ONBOARDING_STEP)));
   }, []);
 
   const goNext = useCallback(() => {
     setCurrentStep((prev: number) => {
-      const next = prev + 1;
-      // Don't go past step 4
-      return Math.min(next, 4);
+      return Math.min(prev + 1, LAST_ONBOARDING_STEP);
     });
   }, []);
 

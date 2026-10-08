@@ -55,5 +55,5 @@ export async function ensureDesktopAppRunning(deps: LaunchDeps): Promise<void> {
       return;
     }
   }
-  throw new Error("Miting is still starting — try again in a moment.");
+  throw new Error("Miting is still starting. Try again in a moment.");
 }

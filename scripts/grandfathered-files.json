@@ -105,5 +105,9 @@
   "frontend/src/lib/whisper.ts",
   "frontend/src/services/updateService.ts",
   "scripts/generate-update-manifest-github.js",
-  "scripts/test-update-locally.js"
+  "scripts/test-update-locally.js",
+  "frontend/src-tauri/src/audio/capture/system_linux.rs",
+  "frontend/src-tauri/src/audio/retranscription.rs",
+  "frontend/src-tauri/src/connectors/integration_commands.rs",
+  "frontend/src/components/record/RecordingHeader.tsx"
 ]

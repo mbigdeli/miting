@@ -280,7 +280,7 @@ export const VirtualizedTranscriptView: React.FC<VirtualizedTranscriptViewProps>
                                 {isPaused
                                     ? 'Click resume to continue recording'
                                     : meetNotice
-                                        ? 'Captions come from Meet — audio is being saved here.'
+                                        ? 'Captions come from Meet. Audio is being saved here.'
                                         : 'Speak to see live transcription'}
                             </p>
                         </>

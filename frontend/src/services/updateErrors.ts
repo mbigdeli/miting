@@ -26,7 +26,7 @@ export interface UpdateErrorInfo {
 const MESSAGES: Record<UpdateErrorKind, string> = {
   'not-configured': 'This build has no update channel configured.',
   unreachable: 'Update server is unreachable right now. Try again later.',
-  offline: 'No internet connection — connect and try again.',
+  offline: 'No internet connection. Connect and try again.',
   'no-build-for-platform': 'No update is published for your platform yet.',
   'bad-signature': 'The update failed its signature check and was not installed.',
   'in-progress': 'An update check is already running.',

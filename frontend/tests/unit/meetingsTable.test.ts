@@ -64,8 +64,8 @@ describe('nextSort', () => {
 describe('formatRowDate / isSummarized', () => {
   test('formats to a short date and dashes invalid input', () => {
     expect(formatRowDate('2026-07-24T02:08:00Z')).toMatch(/Jul 2[34], 2026/);
-    expect(formatRowDate(undefined)).toBe('—');
-    expect(formatRowDate('not-a-date')).toBe('—');
+    expect(formatRowDate(undefined)).toBe('Unknown');
+    expect(formatRowDate('not-a-date')).toBe('Unknown');
   });
   test('isSummarized only for completed', () => {
     expect(isSummarized({ summary_status: 'completed', diarized: false })).toBe(true);

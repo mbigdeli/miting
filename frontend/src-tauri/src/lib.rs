@@ -812,6 +812,7 @@ pub fn run() {
             extension_install::extension_install_run,
             extension_install::extension_install_open_browser,
             extension_install::extension_install_open_folder,
+            extension_install::connection::extension_connection_status,
             // Google Meet ingest (Miting)
             gmeet_ingest::gmeet_pairing_info,
             gmeet_ingest::gmeet_clear_resumable,

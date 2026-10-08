@@ -61,7 +61,7 @@ export function TranscriptionTab({
       />
       {engine === 'shenava' && (
         <p className="mt-2.5 text-[11.5px] leading-snug text-zinc-400">
-          Shenava v1.0 is free to use — keep attribution to the model author when sharing
+          Shenava v1.0 is free to use. Keep attribution to the model author when sharing
           output or redistributing the weights.
         </p>
       )}

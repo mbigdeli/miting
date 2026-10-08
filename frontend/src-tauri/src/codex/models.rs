@@ -31,8 +31,8 @@ fn base_args(workdir: &Path) -> Vec<OsString> {
 
 fn friendly_preflight_err(e: CodexCliError) -> String {
     match e {
-        CodexCliError::NotInstalled => "Codex CLI missing — run: npm i -g @openai/codex".into(),
-        CodexCliError::NotLoggedIn => "Not signed in — use 'Sign in with ChatGPT' first.".into(),
+        CodexCliError::NotInstalled => "Codex CLI missing. Run: npm i -g @openai/codex".into(),
+        CodexCliError::NotLoggedIn => "Not signed in. Use 'Sign in with ChatGPT' first.".into(),
         other => other.to_string(),
     }
 }

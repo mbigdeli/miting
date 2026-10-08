@@ -81,7 +81,7 @@ export function TranscriptPanel({ isProcessingStop, isStopping }: TranscriptPane
       {/* Footer strip */}
       <div className="border-t border-zinc-200 bg-white p-3 text-center text-xs text-zinc-400">
         {isPaused
-          ? 'Paused — resume to keep transcribing'
+          ? 'Paused. Resume to keep transcribing'
           : 'Listening… transcript is saved continuously'}
       </div>
     </div>

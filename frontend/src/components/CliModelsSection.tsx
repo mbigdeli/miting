@@ -56,7 +56,7 @@ export function CliModelsSection({ provider, connected, models, loading, onValid
   return (
     <div className="space-y-2 rounded-md border p-2.5">
       <div className="text-xs text-muted-foreground">
-        No verified models yet. Paste a model id —{' '}
+        No verified models yet. Paste a model id:{' '}
         <button
           type="button"
           className="text-primary underline"

@@ -17,7 +17,7 @@ import { RecordingHeader } from '@/components/record/RecordingHeader';
 import { DeviceErrorAlert } from '@/components/record/DeviceErrorAlert';
 import { TranscriptionOffNotice } from '@/components/record/TranscriptionOffNotice';
 import { useLiveTranscriptionState } from '@/components/record/useLiveTranscriptionState';
-import { HomeSetupSteps } from '@/components/setup/HomeSetupSteps';
+import { HomeSuggestions } from '@/components/setup/HomeSuggestions';
 
 /**
  * Record screen (mockups 2e + 2f): a start-recording hero when idle, and the
@@ -102,7 +102,7 @@ export default function Home() {
               isRecordingDisabled || (!permissions.hasMicrophone && !permissions.isChecking)
             }
             isStarting={controls.isStarting || status === RecordingStatus.STARTING}
-            below={<HomeSetupSteps />}
+            below={<HomeSuggestions />}
           >
             <DeviceErrorAlert error={controls.deviceError} onDismiss={controls.clearDeviceError} />
           </RecordHero>

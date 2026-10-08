@@ -182,13 +182,19 @@ fn generate_token() -> String {
     format!("{a}{b}")
 }
 
+/// Every accepted request also tells Home the extension is installed (see
+/// `extension_install::seen`); the health poll makes that once a minute.
 fn authed<R: Runtime>(headers: &HeaderMap, st: &IngestState<R>) -> bool {
-    headers
+    let ok = headers
         .get(axum::http::header::AUTHORIZATION)
         .and_then(|v| v.to_str().ok())
         .and_then(|v| v.strip_prefix("Bearer "))
         .map(|t| t == st.token.as_str())
-        .unwrap_or(false)
+        .unwrap_or(false);
+    if ok {
+        crate::extension_install::seen::mark(&st.app);
+    }
+    ok
 }
 
 // ---- request/response payloads ------------------------------------------

@@ -1,3 +1,4 @@
+pub mod gmeet_history;
 pub mod meeting;
 pub mod setting;
 pub mod summary;

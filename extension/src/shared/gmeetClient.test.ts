@@ -256,4 +256,16 @@ describe("health reports whether the token is accepted", () => {
     // ...but not usable, which is the signal to re-pair.
     expect(result.data?.authorized).toBe(false);
   });
+
+  it("shows the stored token so the app can grade it", async () => {
+    fetchMock.mockImplementation(async () =>
+      new Response(JSON.stringify({ ok: true, authorized: true }), { status: 200 }),
+    );
+
+    await checkGmeetHealth();
+
+    const call = fetchMock.mock.calls.find((c) => String(c[0]).endsWith("/gmeet/health"));
+    const headers = new Headers((call?.[1] as RequestInit | undefined)?.headers);
+    expect(headers.get("Authorization")).toBe(`Bearer ${PAIRING.token}`);
+  });
 });

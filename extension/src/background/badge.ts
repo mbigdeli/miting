@@ -12,7 +12,7 @@ export async function setBadgeRecording(active: boolean, tabId?: number): Promis
       await chrome.action.setBadgeBackgroundColor({ color: "#dc362e", ...opts });
     }
     await chrome.action.setTitle({
-      title: active ? "Miting — recording" : "Miting",
+      title: active ? "Miting: recording" : "Miting",
       ...opts,
     });
   };

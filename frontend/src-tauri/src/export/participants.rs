@@ -50,8 +50,8 @@ pub fn to_markdown(rows: &[ParticipantRow]) -> String {
             "| {}{} | {} | {} |\n",
             r.name.replace('|', "\\|"),
             me,
-            r.first_seen.as_deref().unwrap_or("—"),
-            r.last_seen.as_deref().unwrap_or("—"),
+            r.first_seen.as_deref().unwrap_or("Unknown"),
+            r.last_seen.as_deref().unwrap_or("Unknown"),
         ));
     }
     out

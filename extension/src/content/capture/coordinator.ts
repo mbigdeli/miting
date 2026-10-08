@@ -200,7 +200,7 @@ export class MeetCaptureCoordinator {
     if (!code) return;
     if (meetChangedInPlace(this.running, this.activeMeetingCode, code)) {
       console.info(
-        `[MCS] meet changed in place (${this.activeMeetingCode} -> ${code}) — rotating the session`,
+        `[MCS] meet changed in place (${this.activeMeetingCode} -> ${code}): rotating the session`,
       );
       this.refusedAutoStart = false;
       // Teardown pauses the OLD session on the server (grace opens), and the
@@ -397,7 +397,7 @@ export class MeetCaptureCoordinator {
       return;
     }
 
-    console.info("[MCS] caption region not visible yet — will retry every 3 s (captions may be off)");
+    console.info("[MCS] caption region not visible yet: will retry every 3 s (captions may be off)");
     let attempts = 0;
     // Self-rescheduling rather than a fixed interval: the search has to
     // outlive the first few minutes. It used to stop after 100 tries, so
@@ -414,7 +414,7 @@ export class MeetCaptureCoordinator {
       }
       if (attempts === REGION_SEARCH_MAX_ATTEMPTS) {
         console.warn(
-          "[MCS] caption region still absent after 5 min — slowing the search, not stopping it",
+          "[MCS] caption region still absent after 5 min: slowing the search, not stopping it",
         );
       }
       const wait =

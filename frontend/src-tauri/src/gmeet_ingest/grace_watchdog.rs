@@ -38,7 +38,7 @@ pub fn spawn_watchdog<R: Runtime>(app: AppHandle<R>) {
                 continue;
             }
             log::warn!(
-                "gmeet grace: companion heartbeat lost for {} — synthesizing the pause",
+                "gmeet grace: companion heartbeat lost for {}: synthesizing the pause",
                 companion.meeting_code
             );
             if let Err(e) =

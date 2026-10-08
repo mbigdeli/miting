@@ -5,10 +5,12 @@
 //! see `gmeet_ingest::native_host`.
 
 mod browser;
+pub mod connection;
 mod digest;
 mod error;
 mod folder;
 mod installer;
+pub mod seen;
 mod swap;
 
 pub use error::ExtensionInstallError;

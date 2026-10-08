@@ -73,12 +73,12 @@ pub fn fetch_prompt(cli_name: &str, vendor: &str, model_flag: &str) -> String {
 currently offers to {cli_name} subscription users as of today, and cross-check against what you \
 know. You MUST run at least one web search before answering. List every model identifier accepted \
 as the argument to `{model_flag}`.\n\n\
-Response rules — follow EXACTLY:\n\
+Response rules: follow EXACTLY:\n\
 - Output raw JSON only. No prose, no markdown fences.\n\
 - Schema: {{\"models\":[{{\"id\":\"<exact model argument string>\",\"label\":\"<short human name>\"}}]}}\n\
 - List only general text/reasoning models suitable for summarizing meeting transcripts.\n\
 - EXCLUDE special-purpose models (code review, auto-*, embeddings, image, audio, realtime).\n\
-- Use exact id strings. Err toward completeness — a backend step verifies each id before use — \
+- Use exact id strings. Err toward completeness: a backend step verifies each id before use, \
 but do not fabricate obviously fake names."
     )
 }

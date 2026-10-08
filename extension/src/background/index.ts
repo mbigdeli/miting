@@ -8,7 +8,6 @@ import {
   endSession as gmeetEndSession,
   pauseSession as gmeetPauseSession,
   resumeSession as gmeetResumeSession,
-  checkGmeetHealth,
   fetchAppState,
   setPairingRefresher,
 } from "../shared/gmeetClient.js";
@@ -33,6 +32,7 @@ import {
   takeTabCapture,
 } from "./tabCaptures.js";
 import { setBadgeRecording } from "./badge.js";
+import { checkServiceHealth } from "./serviceHealth.js";
 
 const HEALTH_ALARM = "mcs-local-service-health";
 
@@ -100,31 +100,11 @@ async function ensureDefaultSettingsPersisted(): Promise<void> {
 }
 
 async function refreshServiceHealth(_ensureTray = false): Promise<void> {
-  // Pair first: `/gmeet/health` is reachable without a token, but the popup
-  // treats a missing pairing as "Desktop app unavailable". On macOS the host
-  // now reads Application Support; this call is what stores the token.
-  await ensureGmeetPairing();
   // Miting: health is the miting desktop app's HTTP gmeet ingest server,
   // NOT the retired Native Messaging host. (The old native host is uninstalled,
   // so serviceClient.checkHealth would always report "unavailable" and block
   // recording.) "connected" is the state the record gate requires.
-  let health = await checkGmeetHealth();
-  // `/gmeet/health` answers without a token so we can tell "Miting is not
-  // running" from "Miting is running but will reject us", and it reports which.
-  // Acting on that here means a token the app has re-minted is repaired on the
-  // next health tick instead of waiting for something to fail with a 401 —
-  // which is how the companion sat for a whole session showing "connected"
-  // while recording could not start.
-  if (health.ok && health.data?.authorized === false) {
-    const refreshed = await ensureGmeetPairing(true);
-    if (refreshed) {
-      console.info("[MCS:bg] pairing token was stale — re-paired with the app");
-      health = await checkGmeetHealth();
-    }
-  }
-  await patchSessionState({
-    localServiceStatus: health.ok ? "connected" : "unavailable",
-  });
+  await patchSessionState({ localServiceStatus: await checkServiceHealth() });
 }
 
 /** The slice of the app's answer a Meet tab decides from. */
@@ -741,7 +721,7 @@ chrome.tabs.onRemoved.addListener((tabId) => {
     const capture = await takeTabCapture(tabId);
     if (capture) {
       console.info(
-        `[MCS:bg] Meet tab ${tabId} closed — pausing session ${capture.sessionId} (watchdog will finalize)`,
+        `[MCS:bg] Meet tab ${tabId} closed: pausing session ${capture.sessionId} (watchdog will finalize)`,
       );
       void pauseSessionFromBackground(capture);
     }

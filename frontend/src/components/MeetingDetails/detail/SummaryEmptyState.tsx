@@ -56,7 +56,7 @@ export default function SummaryEmptyState({
           <textarea
             value={customPrompt}
             onChange={(e) => onPromptChange(e.target.value)}
-            placeholder="Optional context for the AI — people involved, meeting goal, agenda…"
+            placeholder="Optional context for the AI: people involved, meeting goal, agenda…"
             className="mt-6 min-h-[72px] w-full max-w-md resize-y rounded-lg border border-zinc-200 bg-white px-3 py-2 text-left text-[13px] text-zinc-900 placeholder:text-zinc-400 focus:border-brand focus:outline-none"
           />
         </>

@@ -26,11 +26,11 @@ export default function DetailsTab(props: DetailsTabProps) {
 
   const facts: Array<[string, string]> = [
     ['Created', formatMeetingDate(meeting.created_at)],
-    ['Duration', duration !== null ? formatDurationShort(duration) : '—'],
-    ['Transcript segments', segmentCount > 0 ? String(segmentCount) : '—'],
+    ['Duration', duration !== null ? formatDurationShort(duration) : 'Unknown'],
+    ['Transcript segments', segmentCount > 0 ? String(segmentCount) : 'None'],
     [
       'Transcription model',
-      transcriptionLabel(meeting.transcription_engine, meeting.transcription_model) ?? '—',
+      transcriptionLabel(meeting.transcription_engine, meeting.transcription_model) ?? 'Unknown',
     ],
     [
       'Summary model',

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import React from 'react';
 import { toast } from 'sonner';
 import { OnboardingContainer } from '../OnboardingContainer';
 import { useIsMac } from '../shared/useIsMac';
+import { onboardingStepCount } from '../shared/stepCount';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { continueLabel } from '@/lib/setupSteps';
 import { STEP_COPY } from '@/components/setup-steps/options';
@@ -16,39 +16,26 @@ import { useTranscriptionStep } from '@/components/setup-steps/useTranscriptionS
  * as it is made, and "Skip for now" leaves the same choices for Home.
  */
 export function SetupDownloadsStep() {
-  const { goNext, completeOnboarding } = useOnboarding();
+  const { goNext } = useOnboarding();
   const isMac = useIsMac();
   const transcription = useTranscriptionStep({ selectOnStart: true });
   const ai = useAiStep();
-  const [isCompleting, setIsCompleting] = useState(false);
   // A step is covered by a pick made here or by one that already works
   // (a model downloaded earlier, an API set up in Settings).
   const transcriptionCovered = transcription.chosen || transcription.ready;
   const aiCovered = ai.chosen || ai.ready;
   const ready = transcriptionCovered && aiCovered;
 
-  const finish = async () => {
+  // The Chrome extension step comes next; it finishes setup.
+  const finish = () => {
     if (transcription.downloading) {
       toast.info('Downloads will continue in the background', { duration: 5000 });
     }
-    if (isMac) {
-      goNext();
-      return;
-    }
-    setIsCompleting(true);
-    try {
-      await completeOnboarding();
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      window.location.reload();
-    } catch (error) {
-      console.error('Failed to complete onboarding:', error);
-      toast.error('Failed to complete setup', { description: 'Please try again.' });
-      setIsCompleting(false);
-    }
+    goNext();
   };
 
   return (
-    <OnboardingContainer title="Set up text and notes" step={3} totalSteps={isMac ? 4 : 3}>
+    <OnboardingContainer title="Set up text and notes" step={3} totalSteps={onboardingStepCount(isMac)}>
       <div className="mt-8 flex items-start justify-center gap-4">
         <StepColumn
           {...STEP_COPY.transcription}
@@ -66,21 +53,16 @@ export function SetupDownloadsStep() {
 
       <button
         type="button"
-        onClick={() => void finish()}
-        disabled={!ready || isCompleting}
+        onClick={finish}
+        disabled={!ready}
         className="mt-7 flex h-11 min-w-[280px] items-center justify-center rounded-lg bg-zinc-900 px-5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-zinc-900"
       >
-        {isCompleting ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          continueLabel(transcriptionCovered, aiCovered)
-        )}
+        {continueLabel(transcriptionCovered, aiCovered)}
       </button>
 
       <button
         type="button"
-        onClick={() => void finish()}
-        disabled={isCompleting}
+        onClick={finish}
         className="mt-4 text-xs text-zinc-400 transition-colors hover:text-zinc-600"
       >
         Skip for now

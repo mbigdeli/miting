@@ -38,7 +38,7 @@ export function AudioLevelMeter({
         className={`h-2 w-2 shrink-0 rounded-full ${
           isActive ? 'animate-pulse bg-green-500' : 'bg-zinc-300'
         }`}
-        title={`${deviceName} — ${isActive ? 'signal detected' : 'no signal'}`}
+        title={`${deviceName}: ${isActive ? 'signal detected' : 'no signal'}`}
       />
       <div className={`relative min-w-0 flex-1 ${HEIGHTS[size]}`}>
         <div className="h-full w-full overflow-hidden rounded-full bg-zinc-200">

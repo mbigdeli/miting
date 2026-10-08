@@ -9,14 +9,6 @@ export interface ExtensionInstallStatus {
   installPath: string;
 }
 
-export interface GuideStep {
-  title: string;
-  detail: string;
-  /** Screenshot under frontend/public/extension-guide/ (drop-in later). */
-  image: string;
-  imageAlt: string;
-}
-
 export const CHROME_EXTENSIONS_URL = 'chrome://extensions';
 
 /**
@@ -28,34 +20,38 @@ export const EXTENSION_PITCH = {
   headline: 'Only for Google Meet calls.',
   points: [
     'Miting picks up the captions Google Meet already produces, instead of transcribing the call again on your machine.',
-    'Optional — without it, Miting still records and transcribes Meet calls itself.',
+    'Optional. Without it, Miting still records and transcribes Meet calls itself.',
   ],
 } as const;
 
-/** Silent screen-recording of the whole flow (menu -> Load unpacked -> done). */
-export const GUIDE_VIDEO = '/extension-guide/install-walkthrough.mp4';
+export interface GuideStepCopy {
+  title: string;
+  detail: string;
+}
 
-export const GUIDE_STEPS: readonly GuideStep[] = [
-  {
-    title: 'Turn on Developer mode',
-    detail: `In Chrome, open ${CHROME_EXTENSIONS_URL} and flip the "Developer mode" switch in the top-right corner.`,
-    image: '/extension-guide/step-1-developer-mode.png',
-    imageAlt: 'Developer mode toggle on the chrome://extensions page',
-  },
-  {
-    title: 'Click "Load unpacked"',
-    detail: 'The button appears in the top-left once Developer mode is on. A folder picker opens.',
-    image: '/extension-guide/step-2-load-unpacked.png',
-    imageAlt: 'Load unpacked button on the chrome://extensions page',
-  },
-  {
-    title: 'Pick the Miting extension folder',
-    detail:
-      '"Open folder" above reveals it. Miting Companion then appears in your extensions and pairs with the app automatically — no key or extra setup.',
-    image: '/extension-guide/step-3-select-folder.png',
-    imageAlt: 'Folder picker with the extension folder selected',
-  },
-];
+/** One line per step: the fake Chrome window next to it shows the rest. */
+export function guideSteps(isMac: boolean): [GuideStepCopy, GuideStepCopy, GuideStepCopy] {
+  return [
+    {
+      title: 'Turn on Developer mode',
+      // Chrome ignores chrome:// links from other apps, so the address is pasted.
+      detail: 'Paste chrome://extensions into the Chrome address bar. The switch is at the top right.',
+    },
+    { title: 'Click Load unpacked', detail: 'It appears at the top left once Developer mode is on.' },
+    {
+      title: 'Choose the Miting folder',
+      // A Mac folder window has no address bar: ⌘⇧G opens Go to Folder.
+      detail: isMac
+        ? 'In the window that opens, press ⌘ ⇧ G, paste the path, press Return, then click Select.'
+        : 'Paste the path into the address bar of the window that opens, then click Select Folder.',
+    },
+  ];
+}
+
+/** The path as the fake folder window shows it: `~` stands for the Mac home. */
+export function displayPath(path: string): string {
+  return path.replace(/^\/Users\/[^/]+\//, '~/');
+}
 
 /** Is there a bundled build the install dir doesn't have yet? */
 export function needsInstall(s: ExtensionInstallStatus): boolean {
@@ -75,7 +71,7 @@ export function statusLine(s: ExtensionInstallStatus): string {
     return `Version ${s.bundledVersion} is ready to prepare.`;
   }
   if (needsInstall(s)) {
-    return `Prepared: v${s.installedVersion} — update v${s.bundledVersion} available.`;
+    return `Prepared: v${s.installedVersion}, update v${s.bundledVersion} available.`;
   }
   return `Prepared: v${s.installedVersion} (up to date).`;
 }

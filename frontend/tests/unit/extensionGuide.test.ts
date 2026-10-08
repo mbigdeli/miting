@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import {
   EXTENSION_PITCH,
-  GUIDE_STEPS,
-  GUIDE_VIDEO,
+  displayPath,
+  guideSteps,
   installButtonLabel,
   needsInstall,
   statusLine,
@@ -55,12 +55,6 @@ describe('statusLine', () => {
   });
 });
 
-describe('GUIDE_VIDEO', () => {
-  test('walkthrough video lives under /extension-guide/', () => {
-    expect(GUIDE_VIDEO).toMatch(/^\/extension-guide\/.+\.mp4$/);
-  });
-});
-
 describe('EXTENSION_PITCH', () => {
   test('leads with the Google Meet scope', () => {
     expect(EXTENSION_PITCH.headline).toMatch(/google meet/i);
@@ -74,13 +68,31 @@ describe('EXTENSION_PITCH', () => {
   });
 });
 
-describe('GUIDE_STEPS', () => {
-  test('three steps, each with a screenshot slot under /extension-guide/', () => {
-    expect(GUIDE_STEPS).toHaveLength(3);
-    for (const step of GUIDE_STEPS) {
-      expect(step.image).toMatch(/^\/extension-guide\/step-\d.+\.png$/);
-      expect(step.title.length).toBeGreaterThan(0);
-      expect(step.imageAlt.length).toBeGreaterThan(0);
-    }
+describe('guideSteps', () => {
+  test('three steps on both platforms', () => {
+    expect(guideSteps(false)).toHaveLength(3);
+    expect(guideSteps(true)).toHaveLength(3);
+  });
+
+  test('the Mac folder step uses Go to Folder, not an address bar', () => {
+    expect(guideSteps(true)[2].detail).toMatch(/⌘ ⇧ G/);
+    expect(guideSteps(false)[2].detail).toMatch(/address bar/);
+  });
+
+  test('copy has no dashes', () => {
+    const text = [...guideSteps(true), ...guideSteps(false)].map((s) => s.title + s.detail).join(' ');
+    expect(text).not.toMatch(/[–—]/);
+  });
+});
+
+describe('displayPath', () => {
+  test('shortens the Mac home to ~', () => {
+    expect(displayPath('/Users/sam/Library/Application Support/li.bigde.miting/extension')).toBe(
+      '~/Library/Application Support/li.bigde.miting/extension'
+    );
+  });
+
+  test('leaves Windows paths alone', () => {
+    expect(displayPath('C:\Users\sam\ext')).toBe('C:\Users\sam\ext');
   });
 });

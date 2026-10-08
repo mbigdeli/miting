@@ -4,6 +4,7 @@ import { RiOpenaiFill, RiClaudeFill } from 'react-icons/ri';
 import { OnboardingContainer } from '../OnboardingContainer';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useIsMac } from '../shared/useIsMac';
+import { onboardingStepCount } from '../shared/stepCount';
 import { SUMMARY_LANGUAGE_COUNT } from '@/lib/summary-languages';
 
 // Brand marks from RemixIcon, sized to read clearly at list scale.
@@ -60,7 +61,7 @@ export function WelcomeStep() {
         <>
           {/* `bdi` isolates the RTL word so the bidi algorithm cannot drag the
               closing paren to the wrong side, and nowrap keeps the pair from
-              breaking across lines — both of which mangled this line before. */}
+              breaking across lines, both of which mangled this line before. */}
           <span className="whitespace-nowrap">
             Persian (<bdi className="font-vazir">فارسی</bdi>)
           </span>{' '}
@@ -82,9 +83,9 @@ export function WelcomeStep() {
   return (
     <OnboardingContainer
       title="Welcome to Miting"
-      description="Record, transcribe and summarize your mitings — privately, on your own machine."
+      description="Record, transcribe and summarize your mitings, privately, on your own machine."
       step={1}
-      totalSteps={isMac ? 4 : 3}
+      totalSteps={onboardingStepCount(isMac)}
       logo={
         <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand text-xl font-extrabold text-white">
           M

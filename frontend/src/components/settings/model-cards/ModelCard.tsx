@@ -85,7 +85,7 @@ export function ModelCard({
 
       {model.status.kind === 'corrupted' && (
         <p className="mt-2 text-xs text-amber-700">
-          The downloaded file is incomplete or damaged — delete it and download again.
+          The downloaded file is incomplete or damaged. Delete it and download again.
         </p>
       )}
       {model.status.kind === 'error' && (

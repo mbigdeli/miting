@@ -29,7 +29,7 @@ export const ENGINES: Engine[] = [
   {
     id: 'parakeet',
     name: 'Parakeet',
-    desc: 'Fastest — best for real-time',
+    desc: 'Fastest, best for real time',
     Icon: SiNvidia,
     iconClass: 'text-[#76B900]',
   },

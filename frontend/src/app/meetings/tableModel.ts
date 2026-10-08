@@ -73,9 +73,9 @@ export function sortRows(
 }
 
 export function formatRowDate(createdAt?: string): string {
-  if (!createdAt) return '—';
+  if (!createdAt) return 'Unknown';
   const t = Date.parse(createdAt);
-  if (Number.isNaN(t)) return '—';
+  if (Number.isNaN(t)) return 'Unknown';
   return new Date(t).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',

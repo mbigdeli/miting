@@ -230,7 +230,7 @@ async function bootMeetUi(): Promise<void> {
             // click here could stop the recording running in another tab.
             const startBridge = win[CAPTURE_START_BRIDGE];
             if (!startBridge) {
-              showCaptureHint("Recording is unavailable in this tab — reload it.");
+              showCaptureHint("Recording is unavailable in this tab. Reload it.");
               throw new Error("capture_bridge_missing");
             }
             // Awaited, not callback-style: the old form let `finally` run
@@ -261,7 +261,7 @@ async function bootMeetUi(): Promise<void> {
         }
       },
       onToolbarRemoved: async () => {
-        console.info(TAG, "toolbar removed — stopping capture if running");
+        console.info(TAG, "toolbar removed: stopping capture if running");
         await notifyCaptureMeetingEnded("toolbar_removed");
         teardownMeetUi();
       },
@@ -309,5 +309,5 @@ ensureUrlMonitoring();
 if (isActualMeetingRoom()) {
   void bootMeetUi();
 } else {
-  console.info(TAG, "not a meeting room — waiting for SPA navigation");
+  console.info(TAG, "not a meeting room: waiting for SPA navigation");
 }

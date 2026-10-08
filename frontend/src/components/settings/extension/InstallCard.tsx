@@ -43,7 +43,7 @@ export function InstallCard({
           type="button"
           disabled={busy || status.bundledVersion === null}
           onClick={onInstall}
-          title={`${installButtonLabel(status)} — re-copies the files this app ships into the folder below.`}
+          title={`${installButtonLabel(status)}: re-copies the files this app ships into the folder below.`}
           aria-label={installButtonLabel(status)}
           className="grid size-8 shrink-0 place-items-center rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700 disabled:opacity-40"
         >

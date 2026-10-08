@@ -5,8 +5,8 @@ import { toast } from 'sonner';
 import { InstallCard } from '@/components/settings/extension/InstallCard';
 import { usePreparedExtension } from '@/components/settings/extension/usePreparedExtension';
 import { PitchCard } from '@/components/settings/extension/PitchCard';
-import { GuideSteps } from '@/components/settings/extension/GuideSteps';
-import { GuideVideo } from '@/components/settings/extension/GuideVideo';
+import { ExtensionGuide } from '@/components/extension-guide/ExtensionGuide';
+import { useExtensionConnection } from '@/components/extension-guide/useExtensionConnection';
 
 /**
  * Settings -> Chrome Extension. Opens with why the extension exists (it is an
@@ -17,11 +17,12 @@ import { GuideVideo } from '@/components/settings/extension/GuideVideo';
  */
 export function ExtensionTab() {
   const { status, error, preparing, retry, reinstall } = usePreparedExtension();
+  const connection = useExtensionConnection();
 
   const copyPath = useCallback(async (path: string) => {
     try {
       await navigator.clipboard.writeText(path);
-      toast.success('Folder path copied — paste it in Chrome’s folder picker.');
+      toast.success('Folder path copied. Paste it in Chrome’s folder picker.');
     } catch {
       toast.error('Could not copy the path. Select and copy it manually.');
     }
@@ -57,15 +58,17 @@ export function ExtensionTab() {
         />
       )}
 
-      <details className="rounded-xl border border-zinc-200 bg-white px-4 py-3 [&[open]>summary]:mb-3">
-        <summary className="cursor-pointer list-none text-[13.5px] font-medium text-zinc-900 marker:content-none">
-          Show me how to add it to Chrome
-        </summary>
-        <GuideVideo />
-        <div className="mt-4">
-          <GuideSteps />
-        </div>
-      </details>
+      {connection.loaded && (
+        <details
+          open={!connection.everConnected}
+          className="rounded-xl border border-zinc-200 bg-white px-4 py-3 [&[open]>summary]:mb-4"
+        >
+          <summary className="cursor-pointer list-none text-[13.5px] font-medium text-zinc-900 marker:content-none">
+            Show me how to add it to Chrome
+          </summary>
+          <ExtensionGuide connected={connection.everConnected} />
+        </details>
+      )}
     </div>
   );
 }

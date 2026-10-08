@@ -6,9 +6,9 @@ const LINK = 'border-b border-dotted border-zinc-300 hover:text-zinc-800';
 function features(openUrl: (url: string) => void): React.ReactNode[] {
     return [
         'Records mic + system audio, fully on your machine',
-        'Local transcription — nothing leaves your computer',
-        'Summaries with your ChatGPT or Claude plan — no API key',
-        'Google Meet captions via the extension — sharper text, less compute',
+        'Local transcription: nothing leaves your computer',
+        'Summaries with your ChatGPT or Claude plan, no API key',
+        'Google Meet captions via the extension: sharper text, less compute',
         // `bdi` + nowrap keeps the bidi algorithm from flipping the closing
         // paren and stops the pair breaking across lines.
         <>
@@ -17,7 +17,7 @@ function features(openUrl: (url: string) => void): React.ReactNode[] {
             </span>{' '}
             transcription &amp; RTL, first-class
         </>,
-        'Free & open — no seats, no subscription',
+        'Free & open: no seats, no subscription',
     ];
 }
 

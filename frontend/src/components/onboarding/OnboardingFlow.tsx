@@ -2,6 +2,7 @@ import React from 'react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useIsMac } from './shared/useIsMac';
 import {
+  ChromeExtensionStep,
   WelcomeStep,
   PermissionsStep,
   SetupDownloadsStep,
@@ -16,18 +17,16 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const { currentStep } = useOnboarding();
   const isMac = useIsMac();
 
-  // 4-Step Onboarding Flow (System-Recommended Models):
-  // Step 1: Welcome - Introduce Miting features
-  // Step 2: Setup Overview - Database initialization + show recommended downloads
-  // Step 3: Download Progress - Download Parakeet + Summary Model (auto-selected based on platform/RAM)
-  // Step 4: Permissions - Request mic + system audio (macOS only)
+  // Order lives in shared/stepCount.ts: Welcome, Overview, Models,
+  // Chrome extension, then Permissions on macOS only.
 
   return (
     <div className="onboarding-flow">
       {currentStep === 1 && <WelcomeStep />}
       {currentStep === 2 && <SetupOverviewStep />}
       {currentStep === 3 && <SetupDownloadsStep />}
-      {currentStep === 4 && isMac && <PermissionsStep />}
+      {currentStep === 4 && <ChromeExtensionStep />}
+      {currentStep === 5 && isMac && <PermissionsStep />}
     </div>
   );
 }

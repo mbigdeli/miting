@@ -41,7 +41,7 @@ export function MeetingStatusChip({
   if (s === 'failed' || s === 'error') {
     return (
       <span
-        title="The recording and transcript are saved — only the AI summary did not run. Open the miting to try again."
+        title="The recording and transcript are saved. Only the AI summary did not run. Open the miting to try again."
         className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700"
       >
         <AlertCircle className="h-3 w-3" /> No summary

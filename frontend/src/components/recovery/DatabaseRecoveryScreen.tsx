@@ -25,7 +25,7 @@ export function DatabaseRecoveryScreen({ error }: DatabaseRecoveryScreenProps) {
           Miting could not open your meetings database
         </h1>
         <p className="mt-2 text-[15px] text-zinc-500">
-          Your recordings and audio files are untouched — only the database that indexes them
+          Your recordings and audio files are untouched. Only the database that indexes them
           failed to open. Pick a recovery option below.
         </p>
 

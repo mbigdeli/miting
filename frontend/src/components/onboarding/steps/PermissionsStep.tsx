@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { Mic, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { OnboardingContainer } from '../OnboardingContainer';
+import { onboardingStepCount } from '../shared/stepCount';
 import { PermissionRow } from '../shared';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 
@@ -133,8 +134,8 @@ export function PermissionsStep() {
     <OnboardingContainer
       title="Grant permissions"
       description="Miting needs your microphone and system audio to record both sides of a miting."
-      step={4}
-      totalSteps={4}
+      step={5}
+      totalSteps={onboardingStepCount(true)}
     >
       <div className="mt-8 grid w-full max-w-[460px] gap-3">
         <PermissionRow

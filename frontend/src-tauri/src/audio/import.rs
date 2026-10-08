@@ -637,7 +637,7 @@ async fn run_import<R: Runtime>(
             total_confidence += conf;
         } else {
             debug!(
-                "Segment {}/{}: {:.1}s — empty transcription",
+                "Segment {}/{}: {:.1}s: empty transcription",
                 i + 1,
                 processable_count,
                 segment_duration_sec

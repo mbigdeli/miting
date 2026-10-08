@@ -364,7 +364,7 @@ export function createMeetToolbarButton(doc: Document): MeetToolbarButton {
     }
     if (!toolbarRemovedNotified) {
       toolbarRemovedNotified = true;
-      console.info(TAG, "Meet toolbar removed — firing onToolbarRemoved");
+      console.info(TAG, "Meet toolbar removed: firing onToolbarRemoved");
       toolbarRemovedHandler?.();
     }
   };
@@ -429,7 +429,7 @@ export function createMeetToolbarButton(doc: Document): MeetToolbarButton {
 
   return {
     mount() {
-      console.info(TAG, "mount — polling for Meet toolbar");
+      console.info(TAG, "mount: polling for Meet toolbar");
       startPoll();
       scheduleInject();
     },
@@ -502,7 +502,7 @@ export function createMeetToolbarButton(doc: Document): MeetToolbarButton {
     },
 
     destroy() {
-      console.info(TAG, "destroy — removing capture button and observer");
+      console.info(TAG, "destroy: removing capture button and observer");
       observer?.disconnect();
       observer = null;
       stopPoll();

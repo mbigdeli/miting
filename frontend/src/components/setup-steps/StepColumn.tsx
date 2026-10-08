@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { Check, ChevronRight } from 'lucide-react';
 import { OptionRow } from './OptionRow';
 import type { StepRow } from './types';
@@ -15,9 +15,11 @@ interface StepColumnProps {
   collapsed?: { title: string; onChange: () => void };
   /** Home only: link to the matching Settings tab. */
   more?: { label: string; onClick: () => void };
+  /** Home only: extra content under the step (the optional Google Meet step). */
+  footer?: ReactNode;
 }
 
-export function StepColumn({ num, title, need, rows, done, variant, collapsed, more }: StepColumnProps) {
+export function StepColumn({ num, title, need, rows, done, variant, collapsed, more, footer }: StepColumnProps) {
   const home = variant === 'home';
 
   return (
@@ -82,6 +84,7 @@ export function StepColumn({ num, title, need, rows, done, variant, collapsed, m
           )}
         </>
       )}
+      {footer}
     </div>
   );
 }

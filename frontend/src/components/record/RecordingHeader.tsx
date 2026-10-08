@@ -110,7 +110,7 @@ export function RecordingHeader({
             aria-disabled={isCompanionSession}
             title={
               isCompanionSession
-                ? 'This miting is recorded from Google Meet — stop it from the Meet tab in Chrome.'
+                ? 'This miting is recorded from Google Meet. Stop it from the Meet tab in Chrome.'
                 : undefined
             }
             className={`inline-flex h-9 items-center gap-[7px] rounded-lg px-3.5 text-[13px] font-medium text-white disabled:cursor-not-allowed disabled:bg-zinc-400 ${

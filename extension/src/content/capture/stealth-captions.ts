@@ -158,7 +158,7 @@ export class StealthCaptionManager {
 
     const ensured = await this.adapter.ensureCaptionsEnabled();
     if (!ensured) {
-      console.info("[MCS] stealth: could not auto-enable captions yet — retrying until Meet's toolbar is ready");
+      console.info("[MCS] stealth: could not auto-enable captions yet: retrying until Meet's toolbar is ready");
       this.installCaptionWatchdog();
       chrome.storage.onChanged.addListener(this.storageListener);
       // The first enable failing (Meet not rendered yet, right after F5) must
@@ -179,7 +179,7 @@ export class StealthCaptionManager {
     if (region) {
       this.lastKnownRegion = region;
     } else {
-      console.info("[MCS] stealth: caption region not found yet — captions appear once Meet renders them");
+      console.info("[MCS] stealth: caption region not found yet: captions appear once Meet renders them");
     }
     this.attachCcInterceptor();
   }
@@ -204,7 +204,7 @@ export class StealthCaptionManager {
         return;
       }
     }
-    console.warn("[MCS] stealth: captions could not be enabled automatically — turn them on in Meet");
+    console.warn("[MCS] stealth: captions could not be enabled automatically: turn them on in Meet");
   }
 
   deactivate(): void {
@@ -408,7 +408,7 @@ export class StealthCaptionManager {
     if (!this.active) {
       return;
     }
-    console.info("[MCS] stealth: caption region lost or disabled — re-enabling captions");
+    console.info("[MCS] stealth: caption region lost or disabled: re-enabling captions");
     this.lastKnownRegion = null;
     const ok = await this.adapter.ensureCaptionsEnabled();
     if (!ok) {
@@ -431,7 +431,7 @@ export class StealthCaptionManager {
     }
     const snap = await this.adapter.detectCaptionState();
     if (snap.enabled === false) {
-      console.info("[MCS] stealth: session storage changed while capture running — captions off in DOM, re-enabling");
+      console.info("[MCS] stealth: session storage changed while capture running: captions off in DOM, re-enabling");
       await this.reenableAfterCaptionLoss();
     }
   }

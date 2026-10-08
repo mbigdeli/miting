@@ -255,7 +255,7 @@ export function ModelSettingsModal({
         toast.success(
           n > 0
             ? `${n} model${n === 1 ? '' : 's'} verified and saved.`
-            : 'No models passed verification — use the manual entry below.',
+            : 'No models passed verification. Use the manual entry below.',
         );
       }
     } catch (err) {
@@ -1214,7 +1214,7 @@ export function ModelSettingsModal({
                   className="size-9 shrink-0"
                   disabled={cliModelsLoading[cliProvider] || !cliConnected}
                   onClick={() => loadCliModels(cliProvider, true)}
-                  title="Refresh the model list — asks the CLI which models exist, then test-runs each one before listing it."
+                  title="Refresh the model list: asks the CLI which models exist, then test-runs each one before listing it."
                   aria-label="Refresh the model list"
                 >
                   <RefreshCw
@@ -1550,7 +1550,7 @@ export function ModelSettingsModal({
                 {ollamaEndpointChanged && !error && (
                   <Alert className="mt-3 border-yellow-500 bg-yellow-50">
                     <AlertDescription className="text-yellow-800">
-                      Endpoint changed — fetch models before saving.
+                      Endpoint changed. Fetch models before saving.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -1613,7 +1613,7 @@ export function ModelSettingsModal({
                     <Alert className="mb-4">
                       <AlertDescription>
                         {ollamaEndpointChanged
-                          ? 'Endpoint changed — fetch models to load them.'
+                          ? 'Endpoint changed. Fetch models to load them.'
                           : 'No models yet.'}
                       </AlertDescription>
                     </Alert>

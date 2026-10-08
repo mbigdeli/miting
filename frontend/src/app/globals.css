@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* Desktop-app feel: chrome (nav, buttons, labels) is not selectable text.
-   Content the user quotes — transcripts, live captions, summaries, notes —
+   Content the user quotes (transcripts, live captions, summaries, notes)
    opts back in with .selectable; editing surfaces stay selectable always. */
 body {
   -webkit-user-select: none;
@@ -260,4 +260,9 @@ textarea,
 
 [dir='rtl'] .bn-editor {
   direction: rtl;
+}
+/* Click ring of the extension guide's demo cursor */
+@keyframes demo-ripple {
+  0% { opacity: 0.9; transform: scale(0.4); }
+  100% { opacity: 0; transform: scale(1.4); }
 }

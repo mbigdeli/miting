@@ -19,7 +19,7 @@ function base() {
   };
 }
 
-describe("decideCapture — the two-tab war is over", () => {
+describe("decideCapture: the two-tab war is over", () => {
   it("tab B never tears down while the app records tab A", () => {
     // The old global flag turned this exact answer into A's death sentence.
     const d = decideCapture({
@@ -69,7 +69,7 @@ describe("decideCapture — the two-tab war is over", () => {
     expect(d).toBe("begin");
   });
 
-  it("opening B while A sits paused asks — the server hands over", () => {
+  it("opening B while A sits paused asks, the server hands over", () => {
     const d = decideCapture({
       ...base(),
       myCode: B,

@@ -29,15 +29,15 @@ const CAPTION_PAD_SEC: f64 = 20.0;
 const SINGLE_CALL_MAX_SECONDS: f64 = 720.0;
 
 const DIARIZE_SYSTEM_PROMPT: &str = r#"You are a meeting transcript consolidation engine. Two imperfect recordings of
-the SAME meeting are given; produce ONE unified, speaker-attributed transcript —
-the single most reliable version. Output STRICT JSON ONLY — no markdown, no
+the SAME meeting are given; produce ONE unified, speaker-attributed transcript:
+the single most reliable version. Output STRICT JSON ONLY: no markdown, no
 prose, no code fences.
 
 INPUTS
 - caption_events: from Google Meet live captions. Authoritative source for WHO
   SPOKE (speaker_name is a real person) AND the primary source for the WORDING:
   Google's captions are produced by a strong server-side recognizer and are
-  usually the more fluent, correct rendering — especially for non-English
+  usually the more fluent, correct rendering: especially for non-English
   languages (e.g. Persian), proper nouns, names, jargon and acronyms. Their
   weaknesses: lines can be truncated, deduplicated oddly, or lag the audio.
 - transcript_segments: from local Whisper on the meeting audio. Authoritative
@@ -53,11 +53,11 @@ clocks. Infer the offset from how the two sequences line up (ordering, spacing,
 turn continuity, matching text), then align. A caption whose text matches a
 Whisper span pins down both the speaker AND the offset.
 
-TASK — build final_segments (one clean transcript, one line per speaker turn):
+TASK: build final_segments (one clean transcript, one line per speaker turn):
 - WORDS, per segment: choose the more fluent, plausible rendering. Default to
   the caption text when the two disagree and the caption reads coherently;
   fall back to Whisper where captions are missing, truncated mid-sentence, or
-  visibly deduplicated. Judge PER SEGMENT — never globally prefer one source.
+  visibly deduplicated. Judge PER SEGMENT: never globally prefer one source.
   If Whisper for a span is gibberish and a caption covers it, use the caption
   verbatim. Do NOT emit two variants of the same utterance.
 - SPEAKER: assign speaker_name from caption_events by best offset-adjusted time

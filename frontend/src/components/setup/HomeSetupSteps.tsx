@@ -3,47 +3,25 @@
 /**
  * Home's version of the onboarding setup steps, shown under the record button
  * until both steps are done. It cannot be closed before transcription works;
- * a finished step shrinks to one line with Change. Nothing renders until the
- * facts are loaded, so a set up user never sees it flash.
+ * a finished step shrinks to one line with Change. The facts come from
+ * `useHomeSetup`, so nothing renders until they are loaded.
  */
 
-import { useEffect, useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
-import { useConfig } from '@/contexts/ConfigContext';
 import { STEP_COPY } from '@/components/setup-steps/options';
 import { StepColumn } from '@/components/setup-steps/StepColumn';
-import { useAiStep } from '@/components/setup-steps/useAiStep';
-import { useTranscriptionStep } from '@/components/setup-steps/useTranscriptionStep';
-import {
-  aiDoneTitle,
-  canDismissHomeSteps,
-  homeStepsVisible,
-  transcriptionDoneTitle,
-} from '@/lib/setupSteps';
-import { useHomeStepsState } from './useHomeStepsState';
+import { aiDoneTitle, canDismissHomeSteps, transcriptionDoneTitle } from '@/lib/setupSteps';
+import type { HomeSetup } from './useHomeSetup';
 
-export function HomeSetupSteps() {
+export function HomeSetupSteps({ setup, meet }: {
+  setup: HomeSetup;
+  /** The optional Google Meet step, under the finished transcription step. */
+  meet?: React.ReactNode;
+}) {
   const router = useRouter();
-  const { transcriptModelConfig } = useConfig();
-  const transcription = useTranscriptionStep();
-  const ai = useAiStep();
-  const home = useHomeStepsState();
-  const [open, setOpen] = useState({ transcription: false, ai: false });
-
-  // A step opened with Change folds up again once the new choice lands.
-  const transcriptionChoice = `${transcriptModelConfig?.provider}:${transcriptModelConfig?.model}`;
-  useEffect(() => setOpen((value) => ({ ...value, transcription: false })), [transcriptionChoice]);
-  useEffect(() => setOpen((value) => ({ ...value, ai: false })), [ai.provider, ai.ready]);
-
-  if (!transcription.loaded || !ai.loaded || !home.loaded) return null;
-  const visible = homeStepsVisible({
-    transcriptionDone: transcription.ready,
-    aiDone: ai.ready,
-    dismissed: home.dismissed,
-  });
-  if (!visible) return null;
-
+  const { transcription, ai, open } = setup;
   const settings = (tab: string) => () => router.push(`/settings?tab=${tab}`);
   const tr = STEP_COPY.transcription;
   const notes = STEP_COPY.ai;
@@ -59,13 +37,11 @@ export function HomeSetupSteps() {
         variant="home"
         collapsed={
           transcription.ready && !open.transcription
-            ? {
-                title: transcriptionDoneTitle(transcriptModelConfig?.provider),
-                onChange: () => setOpen((value) => ({ ...value, transcription: true })),
-              }
+            ? { title: transcriptionDoneTitle(setup.provider), onChange: () => setup.reopen('transcription') }
             : undefined
         }
         more={{ label: tr.moreLabel, onClick: settings(tr.settingsTab) }}
+        footer={meet}
       />
       <StepColumn
         num={notes.num}
@@ -76,7 +52,7 @@ export function HomeSetupSteps() {
         variant="home"
         collapsed={
           ai.ready && !open.ai
-            ? { title: aiDoneTitle(ai.provider), onChange: () => setOpen((value) => ({ ...value, ai: true })) }
+            ? { title: aiDoneTitle(ai.provider), onChange: () => setup.reopen('ai') }
             : undefined
         }
         more={{ label: notes.moreLabel, onClick: settings(notes.settingsTab) }}
@@ -85,7 +61,7 @@ export function HomeSetupSteps() {
         <button
           type="button"
           aria-label="Dismiss"
-          onClick={() => void home.dismiss()}
+          onClick={() => void setup.dismiss()}
           className="absolute -right-1 -top-0.5 rounded p-1 text-zinc-400 transition-colors hover:text-zinc-700"
         >
           <X size={14} />

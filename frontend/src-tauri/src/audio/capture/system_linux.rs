@@ -45,7 +45,7 @@ pub(super) fn start_monitor_capture() -> Result<SystemAudioStream> {
             let host = cpal::default_host();
             let device = find_monitor_device(&host).ok_or_else(|| {
                 anyhow::anyhow!(
-                    "no monitor source found — is the PulseAudio/PipeWire ALSA plugin installed?"
+                    "no monitor source found: is the PulseAudio/PipeWire ALSA plugin installed?"
                 )
             })?;
             let supported = device
