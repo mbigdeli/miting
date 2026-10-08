@@ -82,4 +82,6 @@ export interface MeetingDetailViewProps {
   loadedCount?: number;
   onLoadMore?: () => void;
   onRefetchTranscripts?: () => Promise<void>;
+  /** Languages this miting has translations in (codes), when translation is on. */
+  translatedLanguages?: string[];
 }

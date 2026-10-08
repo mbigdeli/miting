@@ -239,6 +239,9 @@ pub struct TranscriptSegment {
     pub audio_end_time: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub duration: Option<f64>,
+    /// Live transcript id; links live translations to the saved row.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sequence_id: Option<u64>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -1101,6 +1104,8 @@ pub async fn api_save_transcript<R: Runtime>(
                     log_warn!("Failed to stamp transcription model on {}: {}", meeting_id, e);
                 }
             }
+            crate::translation::store::link_saved_transcript(pool, &meeting_id, &transcripts_to_save)
+                .await;
             // Enhancement runs in the background: the meeting (with its raw
             // transcript) is usable the moment this command returns. Progress
             // and the final swap arrive via transcript-enhancement-progress

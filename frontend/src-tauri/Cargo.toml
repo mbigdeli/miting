@@ -1,6 +1,6 @@
 [package]
 name = "miting"
-version = "1.0.2"
+version = "1.1.0"
 description = "Miting — a privacy-first desktop meeting assistant"
 authors = ["Mohamad Bigdeli"]
 license = "MIT"

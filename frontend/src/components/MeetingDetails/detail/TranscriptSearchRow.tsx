@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Copy, RefreshCw, Search } from 'lucide-react';
 import Analytics from '@/lib/analytics';
 import { useConfig } from '@/contexts/ConfigContext';
@@ -14,6 +14,8 @@ interface TranscriptSearchRowProps {
   meetingId?: string;
   meetingFolderPath?: string | null;
   onRefetchTranscripts?: () => Promise<void>;
+  /** Translate menu, shown before Copy. */
+  translate?: ReactNode;
 }
 
 /** Search-in-transcript input plus the Copy / Enhance actions (mockups 2i / 2r). */
@@ -37,6 +39,7 @@ export default function TranscriptSearchRow(props: TranscriptSearchRowProps) {
           className="h-9 w-full rounded-lg border border-zinc-200 bg-white pl-[34px] pr-3 text-[13px] text-zinc-950 placeholder:text-zinc-400 focus:border-brand focus:outline-none"
         />
       </div>
+      {props.translate}
       <button
         type="button"
         title={props.canCopy ? 'Copy transcript' : 'No transcript available'}

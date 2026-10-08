@@ -13,6 +13,7 @@ import { TranscriptionTab } from '@/components/settings/TranscriptionTab';
 import { PreferenceSettings } from '@/components/PreferenceSettings';
 import { SummaryModelSettings } from '@/components/SummaryModelSettings';
 import { ExtensionTab } from '@/components/settings/ExtensionTab';
+import { TranslationTab } from '@/components/settings/TranslationTab';
 import { useConfig } from '@/contexts/ConfigContext';
 import { SettingsNav } from '@/components/settings/SettingsNav';
 
@@ -21,6 +22,7 @@ const TABS = [
   { value: 'recording', label: 'Recordings', desc: 'How audio is captured and saved to disk.' },
   { value: 'Transcriptionmodels', label: 'Transcription', desc: 'Runs fully on-device. Choose an engine and manage models.' },
   { value: 'summaryModels', label: 'Summary', desc: 'Choose the AI that writes your miting notes.' },
+  { value: 'translation', label: 'Translation', desc: 'Translate transcripts with the AI you use for notes.' },
   { value: 'extension', label: 'Chrome Extension', desc: 'Optional companion that pulls Google Meet’s own captions.' },
 ] as const;
 
@@ -99,6 +101,7 @@ export default function SettingsPage() {
             />
           )}
           {activeTab === 'summaryModels' && <SummaryModelSettings />}
+          {activeTab === 'translation' && <TranslationTab />}
           {activeTab === 'extension' && <ExtensionTab />}
         </div>
       </div>

@@ -11,6 +11,7 @@ import ShareMenu from './ShareMenu';
 import { computeDurationSec, formatDurationShort, formatMeetingDate, speakerStats } from './meetingFacts';
 import { transcriptionLabel } from './transcriptionLabel';
 import type { MeetingDetailViewProps } from './types';
+import { languageList } from '@/lib/translation/languages';
 
 type DetailsTabProps = MeetingDetailViewProps & { diarized: DiarizedSegment[] };
 
@@ -38,6 +39,9 @@ export default function DetailsTab(props: DetailsTabProps) {
         ? [meeting.summary_provider, meeting.summary_model].filter(Boolean).join(' · ')
         : 'Not generated yet',
     ],
+    ...(props.translatedLanguages
+      ? [['Translations', languageList(props.translatedLanguages) || 'None'] as [string, string]]
+      : []),
     ['Miting ID', meeting.id],
   ];
 

@@ -18,6 +18,9 @@ import { DeviceErrorAlert } from '@/components/record/DeviceErrorAlert';
 import { TranscriptionOffNotice } from '@/components/record/TranscriptionOffNotice';
 import { useLiveTranscriptionState } from '@/components/record/useLiveTranscriptionState';
 import { HomeSuggestions } from '@/components/setup/HomeSuggestions';
+import { LiveTranslationButton } from '@/components/record/LiveTranslationButton';
+import { LiveTranslationProvider } from '@/contexts/LiveTranslationContext';
+import { useTranslationEnabled } from '@/lib/translation/enabled';
 
 /**
  * Record screen (mockups 2e + 2f): a start-recording hero when idle, and the
@@ -43,12 +46,18 @@ export default function Home() {
   } = useRecordScreen();
   const { status, isStopping, isSaving, isPaused } = recordingState;
   const liveTranscription = useLiveTranscriptionState();
+  const translationEnabled = useTranslationEnabled();
+  // Only while lines are still coming; Meet companion sessions bring captions,
+  // not local lines to translate.
+  const showTranslation =
+    translationEnabled && recordingState.isRecording && !recordingState.isCompanionSession;
 
   useEffect(() => {
     Analytics.trackPageView('home');
   }, []);
 
   return (
+    <LiveTranslationProvider>
     <div className="relative flex h-screen flex-col bg-zinc-50 font-inter text-zinc-950">
       <SettingsModals modals={modals} messages={messages} onClose={hideModal} />
       <HomeRecovery
@@ -81,6 +90,7 @@ export default function Home() {
             onCopy={copyTranscript}
             showLanguage
             onLanguage={() => showModal('languageSettings')}
+            translation={showTranslation ? <LiveTranslationButton /> : null}
           />
           {liveTranscription.state !== 'active' && (
             <div className="px-7 pb-2">
@@ -117,5 +127,6 @@ export default function Home() {
         sidebarCollapsed={sidebarCollapsed}
       />
     </div>
+    </LiveTranslationProvider>
   );
 }

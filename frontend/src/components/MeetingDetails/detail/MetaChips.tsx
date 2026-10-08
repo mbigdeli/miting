@@ -1,7 +1,8 @@
 'use client';
 
 import { invoke } from '@tauri-apps/api/core';
-import { Calendar, Clock, Sparkles, Users, Video } from 'lucide-react';
+import { Calendar, Clock, Languages, Sparkles, Users, Video } from 'lucide-react';
+import { languageList } from '@/lib/translation/languages';
 import { formatDurationShort, formatMeetingDate } from './meetingFacts';
 
 interface MetaChipsProps {
@@ -13,6 +14,8 @@ interface MetaChipsProps {
   transcription?: string | null;
   /** The Google Meet call this miting was recorded from, if it was one. */
   meetUrl?: string | null;
+  /** Languages the transcript has been translated into. */
+  translated?: string[];
 }
 
 /** "https://meet.google.com/abc-defg-hij?x=1" → "abc-defg-hij" for the chip label. */
@@ -32,6 +35,7 @@ export default function MetaChips({
   participantsCount,
   transcription,
   meetUrl,
+  translated = [],
 }: MetaChipsProps) {
   return (
     <div className="mt-2.5 flex flex-wrap gap-1.5">
@@ -74,6 +78,12 @@ export default function MetaChips({
         >
           <Sparkles size={12} className="fill-brand text-brand" />
           {transcription}
+        </span>
+      )}
+      {translated.length > 0 && (
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 py-[3px] pl-2 pr-2.5 text-[11.5px] text-teal-800">
+          <Languages size={12} className="text-brand" aria-hidden="true" />
+          Translated: {languageList(translated)}
         </span>
       )}
     </div>

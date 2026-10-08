@@ -20,6 +20,12 @@ pub struct DatabaseManager {
 }
 
 impl DatabaseManager {
+    /// Wrap an already-migrated pool (tests that need app state).
+    #[cfg(test)]
+    pub fn from_pool(pool: SqlitePool) -> Self {
+        Self { pool }
+    }
+
     pub async fn new(tauri_db_path: &str, backend_db_path: &str) -> Result<Self> {
         if let Some(parent_dir) = Path::new(tauri_db_path).parent() {
             if !parent_dir.exists() {

@@ -16,6 +16,7 @@ import {
   MdOutlineExtension,
   MdOutlineScience,
   MdOutlineVideoCall,
+  MdOutlineTranslate,
 } from 'react-icons/md';
 
 export interface SettingsTabMeta {
@@ -28,6 +29,7 @@ const TAB_ICONS: Record<string, IconType> = {
   recording: MdOutlineMic,
   Transcriptionmodels: MdOutlineSubtitles,
   summaryModels: MdOutlineAutoAwesome,
+  translation: MdOutlineTranslate,
   integrations: MdOutlineExtension,
   extension: MdOutlineVideoCall,
   beta: MdOutlineScience,

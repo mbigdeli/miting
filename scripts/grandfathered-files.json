@@ -15,6 +15,7 @@
   "frontend/src-tauri/src/api/api.rs",
   "frontend/src-tauri/src/audio/capture/core_audio.rs",
   "frontend/src-tauri/src/audio/capture/system.rs",
+  "frontend/src-tauri/src/audio/common.rs",
   "frontend/src-tauri/src/audio/decoder.rs",
   "frontend/src-tauri/src/audio/device_detection.rs",
   "frontend/src-tauri/src/audio/import.rs",

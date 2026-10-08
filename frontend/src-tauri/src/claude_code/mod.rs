@@ -18,6 +18,8 @@ pub mod exec;
 pub mod models;
 pub mod process;
 pub mod resolve;
+pub mod stream;
+pub mod stream_proto;
 
 use std::path::{Path, PathBuf};
 use tokio_util::sync::CancellationToken;

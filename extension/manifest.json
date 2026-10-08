@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Miting Companion",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtTHe1stEAv4AX3M9GQr648AfGXupYqec0o8fTW/tGdjFBh0DUr4TWsyTwXSPCGY/BtpIX0fvVC+gvHw1F1qyTBepnR2NyJZmTG8rS7PBWbEEK+5oHSDL+id+pAQcg1SX21lCV0OucT64RT8UbtmzEt4OfJAGf0ruXtMLjiJWJ2t3zcQP1gwH40jkn/H9IxP8k6zeCZTmzz0kb4qPXNiV78YIvt5NEPgLJi0rMEJbkqqcD/EF/Xmyfqg/DrMleUZH/l9fixVkQZ6ZR/iwGT6AHUKb0o62tjtRxYTVq/46W6hzsK/recWgd5jQVp+0ylJt0yiLOm6EN1XGayHfrtx/hQIDAQAB",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Miting companion for Google Meet: local-first captions, participants, and audio coordination.",
   "permissions": [
     "storage",

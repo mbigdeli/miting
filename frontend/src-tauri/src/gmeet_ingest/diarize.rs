@@ -364,6 +364,14 @@ async fn write_segments(
         .execute(&mut *tx)
         .await
         .map_err(|e| format!("clear diarized: {e}"))?;
+    // The speaker view is rebuilt, so its translations no longer line up.
+    sqlx::query(
+        "DELETE FROM transcript_translations WHERE meeting_id = ? AND segment_key LIKE 'diarized-%'",
+    )
+    .bind(meeting_id)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| format!("clear diarized translations: {e}"))?;
 
     let mut n = 0i64;
     for s in &segs {

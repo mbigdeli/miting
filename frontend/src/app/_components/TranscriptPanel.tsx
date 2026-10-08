@@ -4,6 +4,10 @@ import { useRecordingState } from '@/contexts/RecordingStateContext';
 import { useConfig } from '@/contexts/ConfigContext';
 import { useLiveCaptions } from '@/contexts/LiveCaptionsContext';
 import { useMemo } from 'react';
+import { useLiveTranslation } from '@/contexts/LiveTranslationContext';
+import { languageName } from '@/lib/translation/languages';
+import { liveTranslationFor, newestTranslated } from '@/lib/translation/lineTranslation';
+import type { LiveStatus } from '@/lib/translation/types';
 
 /**
  * TranscriptPanel Component (mockup 2f body)
@@ -19,6 +23,14 @@ interface TranscriptPanelProps {
   isStopping: boolean;
 }
 
+function footerText(isPaused: boolean, status: LiveStatus): string {
+  if (isPaused) return 'Paused. Resume to keep transcribing';
+  if (status.state === 'running' && status.language) {
+    return `Listening… translating to ${languageName(status.language)} with ${status.provider ?? 'your AI'}`;
+  }
+  return 'Listening… transcript is saved continuously';
+}
+
 export function TranscriptPanel({ isProcessingStop, isStopping }: TranscriptPanelProps) {
   // Contexts
   const { transcripts, transcriptContainerRef } = useTranscripts();
@@ -28,16 +40,20 @@ export function TranscriptPanel({ isProcessingStop, isStopping }: TranscriptPane
   // whole call and this view showed "Listening for speech…" while the captions
   // were arriving and being stored. These come straight from the ingest server.
   const liveCaptions = useLiveCaptions();
+  const translation = useLiveTranslation();
+  const newest = useMemo(() => newestTranslated(translation.lines), [translation.lines]);
 
   // Convert transcripts to segments for virtualized view
   const segments = useMemo(
     () => {
+      const shown = { ...translation.status, language: translation.shownLanguage };
       const local = transcripts.map(t => ({
         id: t.id,
         timestamp: t.audio_start_time ?? 0,
         endTime: t.audio_end_time,
         text: t.text,
         confidence: t.confidence,
+        translation: liveTranslationFor(t.sequence_id, translation.lines, shown, newest),
       }));
       if (liveCaptions.length === 0) {
         return local;
@@ -58,7 +74,7 @@ export function TranscriptPanel({ isProcessingStop, isStopping }: TranscriptPane
         })),
       ];
     },
-    [transcripts, liveCaptions]
+    [transcripts, liveCaptions, translation.lines, translation.status, translation.shownLanguage, newest]
   );
 
   return (
@@ -80,9 +96,7 @@ export function TranscriptPanel({ isProcessingStop, isStopping }: TranscriptPane
 
       {/* Footer strip */}
       <div className="border-t border-zinc-200 bg-white p-3 text-center text-xs text-zinc-400">
-        {isPaused
-          ? 'Paused. Resume to keep transcribing'
-          : 'Listening… transcript is saved continuously'}
+        {footerText(isPaused, translation.status)}
       </div>
     </div>
   );

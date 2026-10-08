@@ -370,7 +370,7 @@ pub async fn generate_summary(
 }
 
 /// Helper function to get provider name for logging
-fn provider_name(provider: &LLMProvider) -> &str {
+pub(crate) fn provider_name(provider: &LLMProvider) -> &'static str {
     match provider {
         LLMProvider::OpenAI => "OpenAI",
         LLMProvider::Claude => "Claude",

@@ -70,6 +70,7 @@ export default function DetailHeader(props: DetailHeaderProps) {
               props.meeting.transcription_engine,
               props.meeting.transcription_model,
             )}
+            translated={props.translatedLanguages}
           />
         </div>
         <div className="flex shrink-0 gap-2">

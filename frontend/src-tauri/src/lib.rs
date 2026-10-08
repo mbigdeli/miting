@@ -63,6 +63,7 @@ pub mod setup_status;
 pub mod shenava_engine;
 pub mod state;
 pub mod summary;
+pub mod translation;
 pub mod tray;
 pub mod utils;
 pub mod whisper_engine;
@@ -800,6 +801,17 @@ pub fn run() {
             codex::commands::codex_login_start,
             codex::commands::codex_logout,
             claude_code::commands::claude_code_status,
+            translation::commands::translation_ai_status,
+            translation::commands::translation_live_start,
+            translation::commands::translation_live_stop,
+            translation::commands::translation_live_status,
+            translation::commands::translation_live_lines,
+            translation::meeting_commands::translation_meeting_languages,
+            translation::meeting_commands::translation_meeting_lines,
+            translation::meeting_commands::translation_meeting_start,
+            translation::meeting_commands::translation_meeting_cancel,
+            translation::meeting_commands::translation_jobs,
+            translation::meeting_commands::translation_meeting_text,
             claude_code::commands::claude_code_login_start,
             claude_code::commands::claude_code_logout,
             // Dynamic CLI model catalogs (validated model pickers)

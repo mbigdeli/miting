@@ -9,6 +9,8 @@ import DetailsTab from './DetailsTab';
 import OverviewTab from './OverviewTab';
 import TranscriptTab from './TranscriptTab';
 import type { MeetingDetailViewProps } from './types';
+import { useTranslationEnabled } from '@/lib/translation/enabled';
+import { useMeetingTranslations } from '@/hooks/meeting-details/useMeetingTranslations';
 
 /**
  * Redesigned meeting-detail page: fixed header (back link, title, chips, tabs)
@@ -19,6 +21,10 @@ export default function MeetingDetailView(props: MeetingDetailViewProps) {
   const [tab, setTab] = useState<DetailTabId>('overview');
   const [diarized, setDiarized] = useState<DiarizedSegment[]>([]);
   const [summaryDirty, setSummaryDirty] = useState(false);
+  const translationEnabled = useTranslationEnabled();
+  const translationState = useMeetingTranslations(props.meeting.id);
+  const translations = translationEnabled ? translationState : undefined;
+  const view = { ...props, translatedLanguages: translations?.languages.map((l) => l.language) };
 
   // Unified speaker-attributed transcript (Whisper + Meet captions merged).
   useEffect(() => {
@@ -45,7 +51,7 @@ export default function MeetingDetailView(props: MeetingDetailViewProps) {
       <div className="shrink-0 px-10 pt-6">
         <div className="mx-auto w-full max-w-[720px]">
           <DetailHeader
-            {...props}
+            {...view}
             diarized={diarized}
             isDirty={props.isTitleDirty || summaryDirty}
           />
@@ -56,21 +62,21 @@ export default function MeetingDetailView(props: MeetingDetailViewProps) {
         {tab === 'overview' && (
           <div className="h-full overflow-y-auto px-10 pb-10">
             <div className="mx-auto w-full max-w-[720px]">
-              <OverviewTab {...props} diarized={diarized} onDirtyChange={handleDirtyChange} />
+              <OverviewTab {...view} diarized={diarized} onDirtyChange={handleDirtyChange} />
             </div>
           </div>
         )}
         {tab === 'transcript' && (
           <div className="h-full px-10 pt-[18px]">
             <div className="mx-auto h-full w-full max-w-[720px]">
-              <TranscriptTab {...props} diarized={diarized} />
+              <TranscriptTab {...view} diarized={diarized} translations={translations} />
             </div>
           </div>
         )}
         {tab === 'details' && (
           <div className="h-full overflow-y-auto px-10">
             <div className="mx-auto w-full max-w-[720px]">
-              <DetailsTab {...props} diarized={diarized} />
+              <DetailsTab {...view} diarized={diarized} />
             </div>
           </div>
         )}

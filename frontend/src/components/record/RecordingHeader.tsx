@@ -1,6 +1,9 @@
 'use client';
 
-import { MdContentCopy, MdOutlineLanguage, MdPause, MdPlayArrow } from 'react-icons/md';
+import type { ReactNode } from 'react';
+import { MdContentCopy, MdOutlineLanguage } from 'react-icons/md';
+import { iconButtonClass } from './headerStyles';
+import { RecordingControls } from './RecordingControls';
 
 interface RecordingHeaderProps {
   title: string;
@@ -23,6 +26,8 @@ interface RecordingHeaderProps {
   onCopy: () => void;
   showLanguage: boolean;
   onLanguage: () => void;
+  /** Extra header control after the language button (live translation). */
+  translation?: ReactNode;
 }
 
 function formatDuration(seconds: number | null): string {
@@ -31,30 +36,10 @@ function formatDuration(seconds: number | null): string {
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 }
 
-const iconButtonClass =
-  'grid h-9 w-9 place-items-center rounded-lg border border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:text-zinc-400';
-
 /** Live recording header (mockup 2f): dot, title, timer, VU meter, pause + stop. */
-export function RecordingHeader({
-  title,
-  durationSeconds,
-  isPaused,
-  isActive,
-  barHeights,
-  showControls,
-  isStopping,
-  isPausing,
-  isResuming,
-  onPauseResume,
-  onStop,
-  isCompanionSession,
-  onCompanionStopBlocked,
-  showCopy,
-  onCopy,
-  showLanguage,
-  onLanguage,
-}: RecordingHeaderProps) {
-  const busy = isStopping || isPausing || isResuming;
+export function RecordingHeader(props: RecordingHeaderProps) {
+  const { isPaused, isActive, barHeights } = props;
+  const busy = props.isStopping || props.isPausing || props.isResuming;
 
   return (
     <div className="flex items-center gap-3 border-b border-zinc-200 bg-white px-8 py-4">
@@ -63,8 +48,10 @@ export function RecordingHeader({
           isPaused ? 'bg-amber-500' : 'bg-red-600'
         } ${isActive ? 'animate-pulse' : ''}`}
       />
-      <span className="min-w-0 truncate text-[15px] font-semibold text-zinc-950">{title}</span>
-      <span className="text-[13px] tabular-nums text-zinc-500">{formatDuration(durationSeconds)}</span>
+      <span className="min-w-0 truncate text-[15px] font-semibold text-zinc-950">{props.title}</span>
+      <span className="text-[13px] tabular-nums text-zinc-500">
+        {formatDuration(props.durationSeconds)}
+      </span>
 
       {/* VU / level meter (animated while actively capturing) */}
       <div className="flex h-[18px] items-end gap-[3px]" aria-hidden="true">
@@ -81,48 +68,33 @@ export function RecordingHeader({
 
       <div className="flex-1" />
 
-      {showCopy && (
-        <button type="button" title="Copy transcript" onClick={onCopy} className={iconButtonClass}>
+      {props.showCopy && (
+        <button type="button" title="Copy transcript" onClick={props.onCopy} className={iconButtonClass}>
           <MdContentCopy size={15} />
         </button>
       )}
-      {showLanguage && (
-        <button type="button" title="Transcription language" onClick={onLanguage} className={iconButtonClass}>
+      {props.showLanguage && (
+        <button
+          type="button"
+          title="Transcription language"
+          onClick={props.onLanguage}
+          className={iconButtonClass}
+        >
           <MdOutlineLanguage size={15} />
         </button>
       )}
+      {props.translation}
 
-      {showControls && (
-        <>
-          <button
-            type="button"
-            title={isPaused ? 'Resume recording' : 'Pause recording'}
-            onClick={onPauseResume}
-            disabled={busy}
-            className={iconButtonClass}
-          >
-            {isPaused ? <MdPlayArrow size={16} /> : <MdPause size={16} />}
-          </button>
-          <button
-            type="button"
-            onClick={isCompanionSession ? onCompanionStopBlocked : onStop}
-            disabled={busy}
-            aria-disabled={isCompanionSession}
-            title={
-              isCompanionSession
-                ? 'This miting is recorded from Google Meet. Stop it from the Meet tab in Chrome.'
-                : undefined
-            }
-            className={`inline-flex h-9 items-center gap-[7px] rounded-lg px-3.5 text-[13px] font-medium text-white disabled:cursor-not-allowed disabled:bg-zinc-400 ${
-              isCompanionSession
-                ? 'cursor-not-allowed bg-zinc-400'
-                : 'bg-zinc-900 hover:bg-zinc-800'
-            }`}
-          >
-            <span className="block h-[11px] w-[11px] rounded-[2px] bg-white" />
-            {isStopping ? 'Stopping…' : 'Stop'}
-          </button>
-        </>
+      {props.showControls && (
+        <RecordingControls
+          isPaused={isPaused}
+          isStopping={props.isStopping}
+          busy={busy}
+          onPauseResume={props.onPauseResume}
+          onStop={props.onStop}
+          isCompanionSession={props.isCompanionSession}
+          onCompanionStopBlocked={props.onCompanionStopBlocked}
+        />
       )}
     </div>
   );

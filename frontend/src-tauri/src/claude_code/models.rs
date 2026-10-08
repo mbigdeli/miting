@@ -34,7 +34,7 @@ const BASE_FLAGS: &[&str] = &[
 ];
 
 /// Stable aliases resolve server-side to the latest model of each family.
-const ALIAS_SEEDS: &[&str] = &["opus", "sonnet", "haiku"];
+pub(crate) const ALIAS_SEEDS: &[&str] = &["opus", "sonnet", "haiku"];
 
 fn signed_in_install() -> Result<ClaudeInstall, String> {
     let install = resolve_claude_binary().map_err(|e| match e {

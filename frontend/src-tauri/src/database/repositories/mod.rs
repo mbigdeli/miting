@@ -6,3 +6,5 @@ pub mod summary_recovery;
 pub mod transcript;
 pub mod transcript_chunk;
 pub mod transcript_enhancement;
+pub mod translation;
+pub mod translation_sources;

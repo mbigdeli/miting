@@ -3,6 +3,10 @@
 import { memo } from 'react';
 import type { DiarizedSegment } from '@/components/DiarizedTranscriptView';
 import { rtlTextProps } from '@/lib/rtl';
+import type { SegmentTranslation } from '@/lib/translation/types';
+import { TranslationLine } from '@/components/translation/TranslationLine';
+
+type TranslationFor = (seq: number) => SegmentTranslation | undefined;
 
 // Speaker pill styles; a speaker's color is stable across the meeting (hash of name).
 const CHIP_STYLES = [
@@ -30,7 +34,7 @@ function formatTime(seconds?: number | null): string {
 interface SpeakerGroup {
   name: string;
   startSec: number | null;
-  texts: string[];
+  lines: { seq: number; text: string }[];
 }
 
 /** Merge consecutive segments from the same speaker into one reading block. */
@@ -40,15 +44,21 @@ function groupBySpeaker(segments: DiarizedSegment[]): SpeakerGroup[] {
     const name = seg.speaker_name?.trim() || 'Unknown';
     const last = groups[groups.length - 1];
     if (last && last.name === name) {
-      last.texts.push(seg.text);
+      last.lines.push({ seq: seg.seq, text: seg.text });
     } else {
-      groups.push({ name, startSec: seg.start_sec ?? null, texts: [seg.text] });
+      groups.push({ name, startSec: seg.start_sec ?? null, lines: [{ seq: seg.seq, text: seg.text }] });
     }
   }
   return groups;
 }
 
-const GroupBlock = memo(function GroupBlock({ group }: { group: SpeakerGroup }) {
+const GroupBlock = memo(function GroupBlock({
+  group,
+  translationFor,
+}: {
+  group: SpeakerGroup;
+  translationFor?: TranslationFor;
+}) {
   return (
     <div>
       <div className="flex items-baseline gap-2">
@@ -59,16 +69,15 @@ const GroupBlock = memo(function GroupBlock({ group }: { group: SpeakerGroup }) 
           <span className="text-[11.5px] tabular-nums text-zinc-400">{formatTime(group.startSec)}</span>
         )}
       </div>
-      {group.texts.map((text, i) => {
+      {group.lines.map(({ seq, text }) => {
         const rtl = rtlTextProps(text);
         return (
-          <p
-            key={i}
-            dir={rtl.dir}
-            className={`mt-1.5 text-sm leading-7 text-zinc-700 ${rtl.className}`}
-          >
-            {text}
-          </p>
+          <div key={seq}>
+            <p dir={rtl.dir} className={`mt-1.5 text-sm leading-7 text-zinc-700 ${rtl.className}`}>
+              {text}
+            </p>
+            <TranslationLine translation={translationFor?.(seq)} />
+          </div>
         );
       })}
     </div>
@@ -76,7 +85,13 @@ const GroupBlock = memo(function GroupBlock({ group }: { group: SpeakerGroup }) 
 });
 
 /** Who-said-what reading pane for the diarized transcript (mockups 2i / 2r). */
-export default function SpeakerTranscript({ segments }: { segments: DiarizedSegment[] }) {
+export default function SpeakerTranscript({
+  segments,
+  translationFor,
+}: {
+  segments: DiarizedSegment[];
+  translationFor?: TranslationFor;
+}) {
   if (segments.length === 0) {
     return (
       <p className="py-10 text-center text-[13px] text-zinc-400">
@@ -88,7 +103,7 @@ export default function SpeakerTranscript({ segments }: { segments: DiarizedSegm
     // ph-no-capture: meeting content stays out of session replays
     <div className="ph-no-capture grid gap-5">
       {groupBySpeaker(segments).map((group, i) => (
-        <GroupBlock key={i} group={group} />
+        <GroupBlock key={i} group={group} translationFor={translationFor} />
       ))}
     </div>
   );
