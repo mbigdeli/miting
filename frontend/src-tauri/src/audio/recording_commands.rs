@@ -297,7 +297,10 @@ pub async fn start_recording_with_meeting_name<R: Runtime>(
         let _ = app_for_error.emit("recording-error", error.user_message());
     });
 
-    manager.set_speaker_models_dir(speaker_models_dir(&app));
+    // Meet sessions get speaker names from Meet: no local speaker pass.
+    if source == TranscriptSource::Local {
+        manager.set_speaker_models_dir(speaker_models_dir(&app));
+    }
     manager.set_speaker_updates(speaker_updates(&app));
 
     // Start recording with resolved devices (replaces start_recording_with_defaults_and_auto_save call)
@@ -485,7 +488,10 @@ pub async fn start_recording_with_devices_and_meeting<R: Runtime>(
         let _ = app_for_error.emit("recording-error", error.user_message());
     });
 
-    manager.set_speaker_models_dir(speaker_models_dir(&app));
+    // Meet sessions get speaker names from Meet: no local speaker pass.
+    if source == TranscriptSource::Local {
+        manager.set_speaker_models_dir(speaker_models_dir(&app));
+    }
     manager.set_speaker_updates(speaker_updates(&app));
 
     // Start recording with specified devices and auto_save setting

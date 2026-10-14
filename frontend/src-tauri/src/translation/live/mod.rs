@@ -3,6 +3,7 @@
 //! closes, queued work finishes, and results wait in `store` for the save.
 
 mod backlog;
+pub mod captions;
 mod deliver;
 mod session;
 mod state;
@@ -48,6 +49,8 @@ pub async fn start<R: Runtime>(app: AppHandle<R>, language: String) -> Result<Li
     let (tx, rx) = mpsc::unbounded_channel::<(u64, String)>();
     let first_live = Arc::new(AtomicU64::new(u64::MAX));
     let seen = first_live.clone();
+    // Meet sessions have no local lines; their captions feed the same queue.
+    let (caption_tx, stop_tx) = (tx.clone(), tx.clone());
     let intake = app.listen("transcript-update", move |event| {
         if let Ok(u) = serde_json::from_str::<Update>(event.payload()) {
             seen.fetch_min(u.sequence_id, Ordering::SeqCst);
@@ -56,10 +59,19 @@ pub async fn start<R: Runtime>(app: AppHandle<R>, language: String) -> Result<Li
             }
         }
     });
-    let stopped = app.listen("recording-stopped", |_| state::close_intake());
+    let pending = captions::Pending::default();
+    let caption_pending = pending.clone();
+    let meet = app.listen("gmeet-caption", move |event| {
+        caption_pending.on_caption(event.payload(), &caption_tx);
+    });
+    let stopped = app.listen("recording-stopped", move |_| {
+        pending.flush(&stop_tx);
+        state::close_intake();
+    });
     let listener_app = app.clone();
     let close = Box::new(move || {
         listener_app.unlisten(intake);
+        listener_app.unlisten(meet);
         listener_app.unlisten(stopped);
     });
 

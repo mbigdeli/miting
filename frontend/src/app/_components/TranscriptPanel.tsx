@@ -7,6 +7,7 @@ import { type ReactNode, useMemo } from 'react';
 import { useLiveTranslation } from '@/contexts/LiveTranslationContext';
 import { languageName } from '@/lib/translation/languages';
 import { liveTranslationFor, newestTranslated } from '@/lib/translation/lineTranslation';
+import { captionSeq } from '@/lib/translation/captionSeq';
 import type { LiveStatus } from '@/lib/translation/types';
 
 /**
@@ -73,6 +74,7 @@ export function TranscriptPanel({ isProcessingStop, isStopping, composer }: Tran
           endTime: undefined,
           text: c.speaker ? `${c.speaker}: ${c.text}` : c.text,
           confidence: undefined,
+          translation: liveTranslationFor(captionSeq(c.id), translation.lines, shown, newest),
         })),
       ];
     },

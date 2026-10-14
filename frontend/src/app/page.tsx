@@ -48,10 +48,9 @@ export default function Home() {
   const { status, isStopping, isSaving, isPaused } = recordingState;
   const liveTranscription = useLiveTranscriptionState();
   const translationEnabled = useTranslationEnabled();
-  // Only while lines are still coming; Meet companion sessions bring captions,
-  // not local lines to translate.
-  const showTranslation =
-    translationEnabled && recordingState.isRecording && !recordingState.isCompanionSession;
+  // Only while lines are still coming: local lines, or Meet captions once
+  // each one is finished.
+  const showTranslation = translationEnabled && recordingState.isRecording;
 
   useEffect(() => {
     Analytics.trackPageView('home');
