@@ -21,6 +21,7 @@ import { HomeSuggestions } from '@/components/setup/HomeSuggestions';
 import { LiveTranslationButton } from '@/components/record/LiveTranslationButton';
 import { LiveTranslationProvider } from '@/contexts/LiveTranslationContext';
 import { useTranslationEnabled } from '@/lib/translation/enabled';
+import { LiveNotesArea } from '@/components/notes/LiveNotesArea';
 
 /**
  * Record screen (mockups 2e + 2f): a start-recording hero when idle, and the
@@ -97,7 +98,9 @@ export default function Home() {
               <TranscriptionOffNotice status={liveTranscription} />
             </div>
           )}
-          <TranscriptPanel isProcessingStop={isProcessingStop} isStopping={isStopping} />
+          <LiveNotesArea title={meetingTitle}>
+            <TranscriptPanel isProcessingStop={isProcessingStop} isStopping={isStopping} />
+          </LiveNotesArea>
         </>
       ) : (
         <>

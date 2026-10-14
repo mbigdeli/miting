@@ -29,6 +29,12 @@ pub struct RecordingManager {
     recording_saver: RecordingSaver,
     device_monitor: Option<AudioDeviceMonitor>,
     device_event_receiver: Option<mpsc::UnboundedReceiver<DeviceEvent>>,
+    channel_tap: Option<crate::channels::ChannelTap>,
+    /// Where the speaker models live; set by the command layer. None turns
+    /// the live speaker pass off (identification runs fully afterwards).
+    speaker_models_dir: Option<std::path::PathBuf>,
+    /// Receives provisional speaker labels after each live chunk.
+    speaker_updates: Option<crate::speakers::live::provisional::OnUpdate>,
 }
 
 // SAFETY: RecordingManager contains types that we've marked as Send
@@ -49,6 +55,9 @@ impl RecordingManager {
             recording_saver: RecordingSaver::new(),
             device_monitor: Some(device_monitor),
             device_event_receiver: Some(device_event_receiver),
+            channel_tap: None,
+            speaker_models_dir: None,
+            speaker_updates: None,
         }
     }
 
@@ -106,12 +115,19 @@ impl RecordingManager {
         // Start the audio processing pipeline with FFmpeg adaptive mixer
         // Pipeline will: 1) Mix mic+system audio with adaptive buffering, 2) Send mixed to recording_sender,
         // 3) Apply VAD and send speech segments to transcription
+        let live = match (self.recording_saver.get_meeting_folder(), &self.speaker_models_dir) {
+            (Some(folder), Some(models)) => crate::speakers::live::LiveFeed::start(folder, models.clone(), self.speaker_updates.clone()),
+            _ => None,
+        };
+        let channel_tap = crate::channels::new_tap(48000, live);
+        self.channel_tap = Some(channel_tap.clone());
         self.pipeline_manager.start(
             self.state.clone(),
             transcription_sender,
             0, // Ignored - using dynamic sizing internally
             48000, // 48kHz sample rate
             Some(recording_sender), // CRITICAL: Pass recording sender to receive pre-mixed audio
+            channel_tap,
             mic_name,
             mic_kind,
             sys_name,
@@ -306,6 +322,7 @@ impl RecordingManager {
             }
         }
 
+        self.save_channel_activity();
         debug!("Recording save operation completed");
         Ok(())
     }
@@ -345,8 +362,25 @@ impl RecordingManager {
             }
         }
 
+        self.save_channel_activity();
         info!("Recording manager stopped");
         Ok(())
+    }
+
+    pub fn set_speaker_models_dir(&mut self, dir: Option<std::path::PathBuf>) {
+        self.speaker_models_dir = dir;
+    }
+
+    pub fn set_speaker_updates(&mut self, sink: crate::speakers::live::provisional::OnUpdate) {
+        self.speaker_updates = Some(sink);
+    }
+
+    /// Write the per-channel loudness log next to the recording, once.
+    fn save_channel_activity(&mut self) {
+        let Some(tap) = self.channel_tap.take() else { return };
+        if let Some(folder) = self.recording_saver.get_meeting_folder() {
+            crate::channels::save_tap(&tap, folder);
+        }
     }
 
     /// Get recording stats from the saver
@@ -474,6 +508,7 @@ impl RecordingManager {
                 error!("Error stopping audio pipeline during cleanup: {}", e);
             }
         }
+        self.channel_tap = None;
         self.state.cleanup();
     }
 

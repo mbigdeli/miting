@@ -97,3 +97,16 @@ async fn pre_existing_meetings_read_back_with_null_attribution() {
     assert_eq!(engine, None);
     assert_eq!(model, None);
 }
+
+#[tokio::test]
+async fn notes_and_ask_tables_present() {
+    let pool = fresh_migrated_pool().await;
+    let notes = columns(&pool, "meeting_note_cards").await;
+    for c in ["at_sec", "body_html", "quotes_json", "source", "edited"] {
+        assert!(notes.contains(&c.to_string()), "meeting_note_cards missing {c}: {notes:?}");
+    }
+    let asks = columns(&pool, "meeting_ask_messages").await;
+    for c in ["asked_at_sec", "question", "answer_md", "citations_json", "saved_note_id"] {
+        assert!(asks.contains(&c.to_string()), "meeting_ask_messages missing {c}: {asks:?}");
+    }
+}

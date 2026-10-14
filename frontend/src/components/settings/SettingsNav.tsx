@@ -13,8 +13,6 @@ import {
   MdOutlineMic,
   MdOutlineSubtitles,
   MdOutlineAutoAwesome,
-  MdOutlineExtension,
-  MdOutlineScience,
   MdOutlineVideoCall,
   MdOutlineTranslate,
 } from 'react-icons/md';
@@ -30,9 +28,7 @@ const TAB_ICONS: Record<string, IconType> = {
   Transcriptionmodels: MdOutlineSubtitles,
   summaryModels: MdOutlineAutoAwesome,
   translation: MdOutlineTranslate,
-  integrations: MdOutlineExtension,
   extension: MdOutlineVideoCall,
-  beta: MdOutlineScience,
 };
 
 export function SettingsNav({

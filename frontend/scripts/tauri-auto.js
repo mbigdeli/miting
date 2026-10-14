@@ -84,12 +84,8 @@ buildAndBundleRustBin('pairing-host', 'miting-pairing-host');
 // clone (Windows kept working off stale binaries/ copies).
 buildAndBundleRustBin('llama-helper', 'llama-helper');
 
-// Bundle the companion extension (best-effort: warns when extension/dist is
-// missing; tauri.conf.json ships frontend/src-tauri/resources/extension).
-execSync(`node "${path.join(repoRoot, 'scripts', 'sync-extension-dist.mjs')}"`, {
-  stdio: 'inherit',
-  env,
-});
+// Bundle the companion extension (rebuilt from source for release builds).
+execSync(`node "${path.join(__dirname, 'bundle-extension.js')}" ${command}`, { stdio: 'inherit', env });
 
 if (platform === 'linux' && feature === 'cuda') {
   console.log('🐧 Linux/CUDA detected: Setting CMAKE flags for NVIDIA GPU');

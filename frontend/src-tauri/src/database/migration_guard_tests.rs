@@ -39,6 +39,11 @@ const SHIPPED_MIGRATIONS: &[(&str, &str)] = &[
     ("20260829000000_gmeet_caption_blocks.sql", "5c5c9fc2304e7c6a"),
     ("20260830000000_gmeet_session_meta.sql", "d0c1ccb3edc4f1f6"),
     ("20261008000000_transcript_translations.sql", "94c3c184846af991"),
+    ("20261008000001_meeting_speakers.sql", "06ed937b15c8530d"),
+    ("20261010000000_meeting_note_cards.sql", "4eb6f4529b28fb33"),
+    ("20261010000001_meeting_ask_messages.sql", "c54934eaadc63eb2"),
+    ("20261012000000_speaker_side.sql", "eca89939255d5223"),
+    ("20261012000001_speaker_merge_hint.sql", "e61364a8b9a3f85c"),
 ];
 
 fn migrations_dir() -> PathBuf {

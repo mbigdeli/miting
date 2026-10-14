@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { importLiveNotes } from '@/lib/notes/api';
 import { useRouter } from 'next/navigation';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
@@ -10,6 +11,7 @@ import { useRecordingState, RecordingStatus } from '@/contexts/RecordingStateCon
 import { storageService } from '@/services/storageService';
 import { transcriptService } from '@/services/transcriptService';
 import Analytics from '@/lib/analytics';
+import { startSpeakerIdentification } from '@/lib/speakersApi';
 import {
   applyPinnedSummaryLanguageToMeeting,
   detectAndCacheSummaryLanguage,
@@ -291,6 +293,9 @@ export function useRecordingStop(
             }
           }
 
+          // Notes and questions from the recording belong to the saved miting
+          // now, before its summary (which uses the notes) is generated.
+          await importLiveNotes(meetingId);
           console.log('✅ Successfully saved COMPLETE meeting with ID:', meetingId);
           console.log('   Transcripts:', freshTranscripts.length);
           console.log('   folder_path:', folderPath);
@@ -383,6 +388,9 @@ export function useRecordingStop(
               } catch (e) {
                 console.warn('[gmeet] summary trigger failed:', e);
               }
+            } else if (freshTranscripts.length > 0) {
+              // Local recording: tell voices apart in the background (doc 18).
+              startSpeakerIdentification(meetingId);
             }
           } catch (e) {
             console.warn('[gmeet] diarization finalize failed:', e);

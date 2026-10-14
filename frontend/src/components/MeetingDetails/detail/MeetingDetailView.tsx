@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import type { DiarizedSegment } from '@/components/DiarizedTranscriptView';
 import DetailHeader from './DetailHeader';
@@ -11,6 +11,10 @@ import TranscriptTab from './TranscriptTab';
 import type { MeetingDetailViewProps } from './types';
 import { useTranslationEnabled } from '@/lib/translation/enabled';
 import { useMeetingTranslations } from '@/hooks/meeting-details/useMeetingTranslations';
+import { Composer } from '@/components/notes/Composer';
+import { SavedNotesShell } from '@/components/notes/SavedNotesShell';
+import { YourNotes } from '@/components/notes/YourNotes';
+import { useMeetingSpeakers } from '@/hooks/meeting-details/useMeetingSpeakers';
 
 /**
  * Redesigned meeting-detail page: fixed header (back link, title, chips, tabs)
@@ -26,7 +30,11 @@ export default function MeetingDetailView(props: MeetingDetailViewProps) {
   const translations = translationEnabled ? translationState : undefined;
   const view = { ...props, translatedLanguages: translations?.languages.map((l) => l.language) };
 
-  // Unified speaker-attributed transcript (Whisper + Meet captions merged).
+  // Unified speaker-attributed transcript (Meet captions merged, or local
+  // speaker identification). Reloaded whenever speakers change.
+  const [diarizedVersion, setDiarizedVersion] = useState(0);
+  const reloadDiarized = useCallback(() => setDiarizedVersion((v) => v + 1), []);
+  const speakers = useMeetingSpeakers(props.meeting.id, reloadDiarized);
   useEffect(() => {
     let cancelled = false;
     invoke<DiarizedSegment[]>('api_get_diarized_segments', { meetingId: props.meeting.id })
@@ -39,7 +47,9 @@ export default function MeetingDetailView(props: MeetingDetailViewProps) {
     return () => {
       cancelled = true;
     };
-  }, [props.meeting.id]);
+  }, [props.meeting.id, diarizedVersion]);
+
+  const showTranscript = useCallback(() => setTab('transcript'), []);
 
   const handleDirtyChange = (dirty: boolean) => {
     setSummaryDirty(dirty);
@@ -47,6 +57,7 @@ export default function MeetingDetailView(props: MeetingDetailViewProps) {
   };
 
   return (
+    <SavedNotesShell meetingId={props.meeting.id} folderPath={props.meeting.folder_path} onShowTranscript={showTranscript}>
     <div className="selectable flex h-full min-h-0 flex-col bg-zinc-50 font-inter text-zinc-950">
       <div className="shrink-0 px-10 pt-6">
         <div className="mx-auto w-full max-w-[720px]">
@@ -63,13 +74,14 @@ export default function MeetingDetailView(props: MeetingDetailViewProps) {
           <div className="h-full overflow-y-auto px-10 pb-10">
             <div className="mx-auto w-full max-w-[720px]">
               <OverviewTab {...view} diarized={diarized} onDirtyChange={handleDirtyChange} />
+              <YourNotes />
             </div>
           </div>
         )}
         {tab === 'transcript' && (
           <div className="h-full px-10 pt-[18px]">
             <div className="mx-auto h-full w-full max-w-[720px]">
-              <TranscriptTab {...view} diarized={diarized} translations={translations} />
+              <TranscriptTab {...view} diarized={diarized} translations={translations} speakers={speakers} />
             </div>
           </div>
         )}
@@ -81,6 +93,14 @@ export default function MeetingDetailView(props: MeetingDetailViewProps) {
           </div>
         )}
       </div>
+      {tab !== 'details' && (
+        <div className="shrink-0 px-10 pb-4 pt-2">
+          <div className="mx-auto w-full max-w-[720px]">
+            <Composer onSummary={tab === 'overview'} />
+          </div>
+        </div>
+      )}
     </div>
+    </SavedNotesShell>
   );
 }

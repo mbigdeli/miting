@@ -14,6 +14,7 @@ import { PreferenceSettings } from '@/components/PreferenceSettings';
 import { SummaryModelSettings } from '@/components/SummaryModelSettings';
 import { ExtensionTab } from '@/components/settings/ExtensionTab';
 import { TranslationTab } from '@/components/settings/TranslationTab';
+import { NotesSetting } from '@/components/settings/NotesSetting';
 import { useConfig } from '@/contexts/ConfigContext';
 import { SettingsNav } from '@/components/settings/SettingsNav';
 
@@ -100,7 +101,7 @@ export default function SettingsPage() {
               setTranscriptModelConfig={setTranscriptModelConfig}
             />
           )}
-          {activeTab === 'summaryModels' && <SummaryModelSettings />}
+          {activeTab === 'summaryModels' && <><NotesSetting /><SummaryModelSettings /></>}
           {activeTab === 'translation' && <TranslationTab />}
           {activeTab === 'extension' && <ExtensionTab />}
         </div>

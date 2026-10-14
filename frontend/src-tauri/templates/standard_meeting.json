@@ -14,9 +14,9 @@
     },
     {
       "title": "Action Items",
-      "instruction": "Every task someone agreed to do. Extract the owner from who accepted the task (use their name as spoken; '—' if unclear) and the due date only if one was said. Include the transcript snippet and timestamp that justifies each row.",
+      "instruction": "Every task someone agreed to do. Extract the owner from who accepted the task (use their name as spoken; '—' if unclear) and the due date only if one was said. Write one checklist item per task and end it with the timestamp of the line that justifies it.",
       "format": "list",
-      "item_format": "| **Owner** | **Task** | **Due** | **Reference** | **Timestamp** |\n| --- | --- | --- | --- | --- |"
+      "item_format": "- [ ] **Task** · Owner · Due [MM:SS]"
     },
     {
       "title": "Discussion Highlights",

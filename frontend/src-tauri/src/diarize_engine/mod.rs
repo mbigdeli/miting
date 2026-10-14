@@ -1,32 +1,22 @@
-//! Acoustic speaker diarization (local, ONNX via `ort`) — labels *who spoke
-//! when* from the recording audio alone, for meetings without Google Meet
-//! captions. Design + rollout: `docs/product-plan/18-acoustic-diarization.md`.
-//!
-//! This first increment lands the pure, model-independent core (clustering +
-//! turn building + transcript labelling) with full unit tests, plus the model
-//! catalog. Segmentation / embedding ONNX inference, model download, the
-//! recording-finalize hook, and the DB writer are subsequent increments — they
-//! need the model files and a real multi-speaker recording to verify quality.
+//! Acoustic speaker diarization (local, CPU): labels *who spoke when* from the
+//! recording audio alone, for meetings without Google Meet captions.
+//! Engine: `polyvoice` (pure Rust, INT8 kernels, VBx clustering), chosen in a
+//! spike on real Persian meetings. Design: `docs/product-plan/18-acoustic-diarization.md`.
 
-pub mod clustering;
-pub mod models;
-pub mod powerset;
+pub mod audio;
+pub mod cleanup;
+pub mod engine;
+pub mod runner;
+pub mod sides;
 pub mod turns;
 
 pub use turns::{merge_turns, speaker_for, speaker_name, SpeakerTurn};
 
-/// Default average-linkage cosine-distance merge threshold. Conservative so
-/// distinct voices stay apart; tuned against real recordings in increment 2.
-pub const DEFAULT_CLUSTER_THRESHOLD: f32 = 0.55;
-
-/// Max gap (seconds) bridged when merging same-speaker windows into one turn.
-pub const DEFAULT_TURN_GAP_SECONDS: f64 = 0.5;
-
-/// The ONNX models' native audio rate: 16 kHz mono (pyannote + CAM++).
+/// The models' native audio rate: 16 kHz mono.
 pub const TARGET_SAMPLE_RATE: u32 = 16_000;
 
-/// A transcript segment tagged with an acoustic speaker label — the unit the
-/// DB writer (increment 2) will persist into `meeting_diarized_segments`.
+/// A transcript segment tagged with an acoustic speaker label: the unit
+/// persisted into `meeting_diarized_segments`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct DiarizedSegment {
     pub start: f64,
@@ -36,8 +26,8 @@ pub struct DiarizedSegment {
 }
 
 /// Tag each `(start, end, text)` transcript segment with the speaker of the
-/// turn it most overlaps. Segments overlapping no turn fall back to
-/// `Speaker 1` (a single-speaker recording still reads sensibly).
+/// turn it most overlaps. A segment that overlaps no turn (VAD trimmed it)
+/// takes the nearest turn in time, so short interjections stay attributed.
 #[must_use]
 pub fn label_transcript(
     turns: &[SpeakerTurn],
@@ -46,7 +36,9 @@ pub fn label_transcript(
     segments
         .iter()
         .map(|(start, end, text)| {
-            let speaker = speaker_for(turns, *start, *end).unwrap_or(0);
+            let speaker = speaker_for(turns, *start, *end)
+                .or_else(|| nearest_speaker(turns, *start, *end))
+                .unwrap_or(0);
             DiarizedSegment {
                 start: *start,
                 end: *end,
@@ -57,24 +49,33 @@ pub fn label_transcript(
         .collect()
 }
 
+/// Speaker of the turn closest in time to `[start, end)`.
+fn nearest_speaker(turns: &[SpeakerTurn], start: f64, end: f64) -> Option<usize> {
+    turns
+        .iter()
+        .map(|t| {
+            let gap = (t.start - end).max(start - t.end).max(0.0);
+            (gap, t.speaker)
+        })
+        .min_by(|a, b| a.0.total_cmp(&b.0))
+        .map(|(_, s)| s)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    fn turn(start: f64, end: f64, speaker: usize) -> SpeakerTurn {
+        SpeakerTurn {
+            start,
+            end,
+            speaker,
+        }
+    }
+
     #[test]
     fn labels_segments_by_overlapping_turn() {
-        let turns = vec![
-            SpeakerTurn {
-                start: 0.0,
-                end: 2.0,
-                speaker: 0,
-            },
-            SpeakerTurn {
-                start: 2.0,
-                end: 5.0,
-                speaker: 1,
-            },
-        ];
+        let turns = vec![turn(0.0, 2.0, 0), turn(2.0, 5.0, 1)];
         let segs = vec![
             (0.0, 1.8, "hello".to_string()),
             (2.1, 4.0, "world".to_string()),
@@ -86,7 +87,14 @@ mod tests {
     }
 
     #[test]
-    fn segment_without_a_turn_defaults_to_speaker_one() {
+    fn segment_without_overlap_takes_nearest_turn() {
+        let turns = vec![turn(0.0, 2.0, 0), turn(10.0, 12.0, 1)];
+        let out = label_transcript(&turns, &[(9.0, 9.5, "yes".to_string())]);
+        assert_eq!(out[0].speaker_name, "Speaker 2");
+    }
+
+    #[test]
+    fn no_turns_at_all_defaults_to_speaker_one() {
         let out = label_transcript(&[], &[(0.0, 1.0, "hi".to_string())]);
         assert_eq!(out[0].speaker_name, "Speaker 1");
     }

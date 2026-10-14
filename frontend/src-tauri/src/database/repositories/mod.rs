@@ -1,6 +1,9 @@
+pub mod ask_messages;
 pub mod gmeet_history;
 pub mod meeting;
+pub mod note_cards;
 pub mod setting;
+pub mod speakers;
 pub mod summary;
 pub mod summary_recovery;
 pub mod transcript;

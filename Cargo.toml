@@ -9,7 +9,7 @@ members = [
 # Shared workspace settings
 [workspace.package]
 edition = "2021"
-rust-version = "1.77"
+rust-version = "1.94"
 
 # Shared dependencies that can be inherited by workspace members
 [workspace.dependencies]
@@ -17,3 +17,29 @@ anyhow = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio = { version = "1.32.0", features = ["full"] }
+
+# Speaker identification (polyvoice) and the numeric crates under it are
+# dozens of times slower unoptimized: a 5-minute clip took over 14 minutes in a
+# plain dev build vs 17 s optimized. Keep dev builds usable on real meetings.
+[profile.dev.package.polyvoice]
+opt-level = 3
+[profile.dev.package.polyvoice-kernels]
+opt-level = 3
+[profile.dev.package.rten-base]
+opt-level = 3
+[profile.dev.package.rten-gemm]
+opt-level = 3
+[profile.dev.package.rten-parallel]
+opt-level = 3
+[profile.dev.package.rten-simd]
+opt-level = 3
+[profile.dev.package.rten-tensor]
+opt-level = 3
+[profile.dev.package.ndarray]
+opt-level = 3
+[profile.dev.package.matrixmultiply]
+opt-level = 3
+[profile.dev.package.realfft]
+opt-level = 3
+[profile.dev.package.rustfft]
+opt-level = 3

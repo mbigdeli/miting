@@ -3,12 +3,12 @@
 export type DetailTabId = 'overview' | 'transcript' | 'details';
 
 const TABS: Array<{ id: DetailTabId; label: string }> = [
-  { id: 'overview', label: 'Overview' },
+  { id: 'overview', label: 'Summary' },
   { id: 'transcript', label: 'Transcript' },
   { id: 'details', label: 'Details' },
 ];
 
-/** Overview / Transcript / Details tab bar (mockups 2h/2i/2w; Action plan is out of scope). */
+/** Summary / Transcript / Details tab bar (doc 20 renamed Overview to Summary). */
 export default function DetailTabs({
   active,
   onSelect,

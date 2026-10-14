@@ -17,7 +17,7 @@
       "title": "Up Next",
       "instruction": "Work each person committed to next, with the owner. Only include commitments actually stated in the transcript; do not infer plans. If none, write 'None stated.'",
       "format": "list",
-      "item_format": "| **Owner** | **Planned** |\n| --- | --- |"
+      "item_format": "- [ ] **Planned work** · Owner"
     },
     {
       "title": "Blockers",

@@ -32,7 +32,7 @@ pub struct PreferredTranscriptSegment {
     pub duration: Option<f64>,
 }
 
-async fn load_preferred(
+pub(crate) async fn load_preferred(
     pool: &SqlitePool,
     meeting_id: &str,
 ) -> Result<PreferredTranscriptResponse, sqlx::Error> {

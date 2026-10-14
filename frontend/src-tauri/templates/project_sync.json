@@ -27,9 +27,9 @@
     },
     {
       "title": "Action Items",
-      "instruction": "Every task someone agreed to do, with owner and due date if stated ('—' otherwise). One row per task; be specific enough that the owner recognises it a week later. If none, write 'No action items.'",
+      "instruction": "Every task someone agreed to do, with owner and due date if stated ('—' otherwise). One checklist item per task; be specific enough that the owner recognises it a week later. If none, write 'No action items.'",
       "format": "list",
-      "item_format": "| **Owner** | **Task** | **Due** |\n| --- | --- | --- |"
+      "item_format": "- [ ] **Task** · Owner · Due"
     },
     {
       "title": "Open Questions",

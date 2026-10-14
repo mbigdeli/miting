@@ -32,6 +32,8 @@ export interface VirtualizedTranscriptViewProps {
     totalCount?: number;
     loadedCount?: number;
     onLoadMore?: () => void;
+    /** Scroll this segment to the middle (the line being played). */
+    scrollToId?: string | null;
 }
 
 // Threshold for enabling virtualization (below this, use simple rendering)
@@ -54,6 +56,7 @@ export const VirtualizedTranscriptView: React.FC<VirtualizedTranscriptViewProps>
     totalCount = 0,
     loadedCount = 0,
     onLoadMore,
+    scrollToId = null,
 }) => {
     // Create scroll ref first - shared between virtualizer and auto-scroll hook
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -93,6 +96,19 @@ export const VirtualizedTranscriptView: React.FC<VirtualizedTranscriptViewProps>
         isRecording,
         enableStreaming
     );
+
+    // Follow the playhead, including rows the virtualizer has not rendered.
+    useEffect(() => {
+        if (!scrollToId) return;
+        const index = segments.findIndex((s) => s.id === scrollToId);
+        if (index < 0) return;
+        if (segments.length >= VIRTUALIZATION_THRESHOLD) {
+            virtualizer.scrollToIndex(index, { align: 'center' });
+        } else {
+            document.getElementById(`segment-${scrollToId}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [scrollToId]);
 
     // Infinite scroll: IntersectionObserver to trigger loading more
     useEffect(() => {
@@ -247,6 +263,7 @@ export const VirtualizedTranscriptView: React.FC<VirtualizedTranscriptViewProps>
                                         isStreaming={isStreaming}
                                         showConfidence={showConfidence}
                                         translation={segment.translation}
+                                        live={isRecording}
                                     />
                                 </div>
                             );
@@ -304,6 +321,7 @@ export const VirtualizedTranscriptView: React.FC<VirtualizedTranscriptViewProps>
                                         isStreaming={isStreaming}
                                         showConfidence={showConfidence}
                                         translation={segment.translation}
+                                        live={isRecording}
                                     />
                                 </motion.div>
                             );

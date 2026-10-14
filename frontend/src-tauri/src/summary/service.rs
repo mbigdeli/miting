@@ -142,7 +142,7 @@ fn build_summary_result_json(
     output_language: Option<&str>,
 ) -> serde_json::Value {
     serde_json::json!({
-        "markdown": strip_title_if_present(final_markdown),
+        "markdown": super::task_list::normalize(&strip_title_if_present(final_markdown)),
         ENGLISH_CACHE_FIELD: EnglishSummaryCache {
             markdown: english_markdown.to_string(),
             source,
@@ -314,6 +314,9 @@ impl SummaryService {
 
         // Register cancellation token for this meeting
         let cancellation_token = Self::register_cancellation_token(&meeting_id);
+        // The user's notes are the outline of the summary (doc 20).
+        let custom_prompt =
+            crate::ask::summary_notes::with_notes(&pool, &meeting_id, custom_prompt).await;
 
         // Tell the UI the row is busy now, not on its next poll tick.
         emit_summary_status(&app, &meeting_id, summary_status::PENDING, None);

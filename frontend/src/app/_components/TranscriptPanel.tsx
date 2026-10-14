@@ -3,7 +3,7 @@ import { useTranscripts } from '@/contexts/TranscriptContext';
 import { useRecordingState } from '@/contexts/RecordingStateContext';
 import { useConfig } from '@/contexts/ConfigContext';
 import { useLiveCaptions } from '@/contexts/LiveCaptionsContext';
-import { useMemo } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { useLiveTranslation } from '@/contexts/LiveTranslationContext';
 import { languageName } from '@/lib/translation/languages';
 import { liveTranslationFor, newestTranslated } from '@/lib/translation/lineTranslation';
@@ -21,6 +21,8 @@ interface TranscriptPanelProps {
   // indicates stop-processing state for transcripts; derived from backend statuses.
   isProcessingStop: boolean;
   isStopping: boolean;
+  /** The notes box, shown under the transcript (doc 20). */
+  composer?: ReactNode;
 }
 
 function footerText(isPaused: boolean, status: LiveStatus): string {
@@ -31,7 +33,7 @@ function footerText(isPaused: boolean, status: LiveStatus): string {
   return 'Listening… transcript is saved continuously';
 }
 
-export function TranscriptPanel({ isProcessingStop, isStopping }: TranscriptPanelProps) {
+export function TranscriptPanel({ isProcessingStop, isStopping, composer }: TranscriptPanelProps) {
   // Contexts
   const { transcripts, transcriptContainerRef } = useTranscripts();
   const { isRecording, isPaused } = useRecordingState();
@@ -93,6 +95,12 @@ export function TranscriptPanel({ isProcessingStop, isStopping }: TranscriptPane
           />
         </div>
       </div>
+
+      {composer && (
+        <div className="px-8 pb-3 pt-1">
+          <div className="mx-auto w-full max-w-[680px]">{composer}</div>
+        </div>
+      )}
 
       {/* Footer strip */}
       <div className="border-t border-zinc-200 bg-white p-3 text-center text-xs text-zinc-400">

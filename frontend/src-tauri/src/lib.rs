@@ -36,10 +36,12 @@ pub(crate) use perf_trace;
 
 // Declare audio module
 pub mod activity;
+pub mod ask;
 pub mod analytics;
 pub mod anthropic;
 pub mod api;
 pub mod audio;
+pub mod channels;
 pub mod claude_code;
 pub(crate) mod cli_proc;
 pub mod codex;
@@ -57,6 +59,7 @@ pub mod onboarding;
 pub mod openai;
 pub mod openrouter;
 pub mod parakeet_engine;
+pub mod speakers;
 pub mod platform;
 pub mod recording_indicator;
 pub mod setup_status;
@@ -802,6 +805,13 @@ pub fn run() {
             codex::commands::codex_logout,
             claude_code::commands::claude_code_status,
             translation::commands::translation_ai_status,
+            ask::commands::ask_meeting,
+            ask::commands::ask_list,
+            ask::commands::ask_mark_saved,
+            ask::notes_commands::notes_list,
+            ask::notes_commands::notes_upsert,
+            ask::notes_commands::notes_delete,
+            ask::notes_commands::notes_import_live,
             translation::commands::translation_live_start,
             translation::commands::translation_live_stop,
             translation::commands::translation_live_status,
@@ -830,6 +840,14 @@ pub fn run() {
             gmeet_ingest::gmeet_clear_resumable,
             gmeet_ingest::diarize::gmeet_finalize_diarization,
             gmeet_ingest::diarize::api_get_diarized_segments,
+            // Acoustic speaker identification (doc 18)
+            speakers::commands::speakers_identify,
+            speakers::commands::speakers_stage,
+            speakers::commands::speakers_list,
+            speakers::commands::speakers_rename,
+            speakers::commands::speakers_confirm,
+            speakers::commands::speakers_dismiss_merge,
+            speakers::commands::speakers_reassign,
             // Activity/status surface (Miting)
             activity::api_get_meetings_status,
             // Built-in AI commands

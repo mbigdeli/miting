@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useChecklistAutosave } from './useChecklistAutosave';
 import dynamic from 'next/dynamic';
 import { Summary, SummaryDataResponse, SummaryFormat, BlockNoteBlock } from '@/types';
 import { AISummary } from './index';
@@ -100,6 +101,7 @@ export const BlockNoteSummaryView = forwardRef<BlockNoteSummaryViewRef, BlockNot
           // Delay to ensure editor has finished rendering before allowing onChange
           setTimeout(() => {
             isContentLoaded.current = true;
+            ticks.prime(editor.document);
           }, 100);
         } catch (err) {
           console.error('❌ Failed to parse markdown:', err);
@@ -115,17 +117,34 @@ export const BlockNoteSummaryView = forwardRef<BlockNoteSummaryViewRef, BlockNot
       // Delay to ensure editor has finished rendering
       setTimeout(() => {
         isContentLoaded.current = true;
+        ticks.prime(data.summary_json ?? []);
       }, 100);
     }
   }, [format, data?.summary_json]);
+
+  // A ticked action item saves right away (doc 20); other edits wait for Save.
+  const saveTicked = useCallback(
+    async (blocks: Block[]) => {
+      if (!onSave) return;
+      const md = await blocksToMarkdownSafely(editor, blocks, { source: 'BlockNoteSummaryView.tick' });
+      onSave({
+        summary_json: blocks as unknown as BlockNoteBlock[],
+        ...(md.markdown !== undefined ? { markdown: md.markdown } : {}),
+      });
+      setIsDirty(false);
+    },
+    [onSave, editor]
+  );
+  const ticks = useChecklistAutosave<Block>(saveTicked);
 
   const handleEditorChange = useCallback((blocks: Block[]) => {
     // Only set dirty flag if content has finished loading
     if (isContentLoaded.current) {
       setCurrentBlocks(blocks);
       setIsDirty(true);
+      ticks.onChange(blocks);
     }
-  }, []);
+  }, [ticks]);
 
   // Notify parent of dirty state changes
   useEffect(() => {

@@ -33,7 +33,7 @@
       "title": "Follow-ups",
       "instruction": "The concrete next steps to keep the deal moving, each with an owner. End with the agreed next touchpoint if one was scheduled.",
       "format": "list",
-      "item_format": "| **Owner** | **Next step** | **When** |\n| --- | --- | --- |"
+      "item_format": "- [ ] **Next step** · Owner · When"
     }
   ]
 }

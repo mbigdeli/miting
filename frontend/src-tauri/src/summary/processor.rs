@@ -128,7 +128,7 @@ fn translation_system_prompt(target_language: &str) -> String {
 
 **CRITICAL RULES:**
 1. Translate every sentence, heading, list item, and table cell into {target_language}.
-2. Preserve the Markdown structure EXACTLY: keep every `#`, `**`, `-`, `|`, code fence marker, and table pipe in the same position.
+2. Preserve the Markdown structure EXACTLY: keep every `#`, `**`, `-`, `- [ ]`, `|`, code fence marker, and table pipe in the same position.
 3. Do NOT translate: proper nouns (names of people, products, companies), code identifiers, file paths, URLs, numeric values, or text inside backticks.
 4. Do not add commentary or explanation. Output ONLY the translated Markdown.
 5. If a technical term has no standard translation, keep the original English word."#
@@ -162,6 +162,7 @@ fn build_final_report_system_prompt(
 5. If a section has no relevant info, write "None noted in this section."
 6. Output **only** the completed Markdown report.
 7. If unsure about something, omit it.
+8. Write every task, action item, follow-up or next step as a Markdown task list item: `- [ ] task · owner · due`.
 
 **SECTION-SPECIFIC INSTRUCTIONS:**
 {section_instructions}
